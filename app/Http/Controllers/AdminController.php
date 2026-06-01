@@ -802,41 +802,60 @@ class AdminController extends Controller
         $rows = [];
 
         if (($handle = fopen($path, 'r')) !== false) {
-            $header = null;
-            $rowNum = 0;
-            $firstRowValues = [];
-
+            $allParsedRows = [];
             while (($line = fgetcsv($handle, 0, ',')) !== false) {
-                $rowNum++;
+                $allParsedRows[] = $line;
+            }
+            fclose($handle);
 
-                if ($rowNum === 1) {
-                    $firstRowValues = $line;
-                    continue;
+            if (count($allParsedRows) > 0) {
+                $row1 = $allParsedRows[0];
+                $row2 = $allParsedRows[1] ?? [];
+                
+                $row1Normalized = array_map([$this, 'normalizeImportHeader'], $row1);
+                $row2Normalized = array_map([$this, 'normalizeImportHeader'], $row2);
+
+                // Auto-detect double-row header vs single-row header
+                $isDoubleHeader = false;
+                if (!empty($row2)) {
+                    $knownSubjects = ['qh', 'aa', 'fik', 'ski', 'pp', 'bind', 'bar', 'mtk', 'ipa', 'ips', 'bing', 'sp', 'pjok', 'info', 'bsd'];
+                    $subjectMatchCount = 0;
+                    for ($i = 8; $i < count($row2Normalized); $i++) {
+                        if (in_array($row2Normalized[$i], $knownSubjects)) {
+                            $subjectMatchCount++;
+                        }
+                    }
+                    
+                    $nisnValue = trim($row2[1] ?? '');
+                    $isNisnNumeric = preg_match('/^\d+$/', $nisnValue);
+                    
+                    if ($subjectMatchCount >= 2 || (empty($nisnValue) && !$isNisnNumeric)) {
+                        $isDoubleHeader = true;
+                    }
                 }
 
-                if ($rowNum === 2) {
-                    // Build double-row header
+                if ($isDoubleHeader) {
                     $header = [];
-                    // First 8 columns from Row 1
                     for ($i = 0; $i < 8; $i++) {
-                        $header[$i] = $this->normalizeImportHeader($firstRowValues[$i] ?? '');
+                        $header[$i] = $this->normalizeImportHeader($row1[$i] ?? '');
                     }
-                    // Remaining columns (subjects) from Row 2
-                    $totalCols = max(count($firstRowValues), count($line));
+                    $totalCols = max(count($row1), count($row2));
                     for ($i = 8; $i < $totalCols; $i++) {
-                        $header[$i] = $this->normalizeImportHeader($line[$i] ?? $firstRowValues[$i] ?? '');
+                        $header[$i] = $this->normalizeImportHeader($row2[$i] ?? $row1[$i] ?? '');
                     }
-                    continue;
+                    $dataStartIndex = 2;
+                } else {
+                    $header = $row1Normalized;
+                    $dataStartIndex = 1;
                 }
 
-                if ($header) {
+                for ($idx = $dataStartIndex; $idx < count($allParsedRows); $idx++) {
+                    $line = $allParsedRows[$idx];
                     $line = array_pad($line, count($header), '');
                     $line = array_slice($line, 0, count($header));
                     $rows[] = array_combine($header, $line);
                 }
             }
-
-            fclose($handle);
         }
 
         return $rows;
@@ -854,12 +873,9 @@ class AdminController extends Controller
             }
 
             $xml = simplexml_load_string($sheetXml);
-            $header = null;
-            $rowNum = 0;
-            $firstRowValues = [];
+            $allParsedRows = [];
 
             foreach ($xml->sheetData->row as $row) {
-                $rowNum++;
                 $values = [];
 
                 // Parse cell elements and place them into exact column index to prevent misalignment with empty cells
@@ -882,34 +898,59 @@ class AdminController extends Controller
                 }
                 ksort($values);
 
-                if ($rowNum === 1) {
-                    $firstRowValues = $values;
-                    continue;
+                $allParsedRows[] = $values;
+            }
+
+            $zip->close();
+
+            if (count($allParsedRows) > 0) {
+                $row1 = $allParsedRows[0];
+                $row2 = $allParsedRows[1] ?? [];
+                
+                $row1Normalized = array_map([$this, 'normalizeImportHeader'], $row1);
+                $row2Normalized = array_map([$this, 'normalizeImportHeader'], $row2);
+
+                // Auto-detect double-row header vs single-row header
+                $isDoubleHeader = false;
+                if (!empty($row2)) {
+                    $knownSubjects = ['qh', 'aa', 'fik', 'ski', 'pp', 'bind', 'bar', 'mtk', 'ipa', 'ips', 'bing', 'sp', 'pjok', 'info', 'bsd'];
+                    $subjectMatchCount = 0;
+                    for ($i = 8; $i < count($row2Normalized); $i++) {
+                        if (in_array($row2Normalized[$i], $knownSubjects)) {
+                            $subjectMatchCount++;
+                        }
+                    }
+                    
+                    $nisnValue = trim($row2[1] ?? '');
+                    $isNisnNumeric = preg_match('/^\d+$/', $nisnValue);
+                    
+                    if ($subjectMatchCount >= 2 || (empty($nisnValue) && !$isNisnNumeric)) {
+                        $isDoubleHeader = true;
+                    }
                 }
 
-                if ($rowNum === 2) {
-                    // Build double-row header
+                if ($isDoubleHeader) {
                     $header = [];
-                    // First 8 columns from Row 1
                     for ($i = 0; $i < 8; $i++) {
-                        $header[$i] = $this->normalizeImportHeader($firstRowValues[$i] ?? '');
+                        $header[$i] = $this->normalizeImportHeader($row1[$i] ?? '');
                     }
-                    // Remaining columns (subjects) from Row 2
-                    $totalCols = max(count($firstRowValues), count($values));
+                    $totalCols = max(count($row1), count($row2));
                     for ($i = 8; $i < $totalCols; $i++) {
-                        $header[$i] = $this->normalizeImportHeader($values[$i] ?? $firstRowValues[$i] ?? '');
+                        $header[$i] = $this->normalizeImportHeader($row2[$i] ?? $row1[$i] ?? '');
                     }
-                    continue;
+                    $dataStartIndex = 2;
+                } else {
+                    $header = $row1Normalized;
+                    $dataStartIndex = 1;
                 }
 
-                if ($header) {
+                for ($idx = $dataStartIndex; $idx < count($allParsedRows); $idx++) {
+                    $values = $allParsedRows[$idx];
                     $values = array_pad($values, count($header), '');
                     $values = array_slice($values, 0, count($header));
                     $rows[] = array_combine($header, $values);
                 }
             }
-
-            $zip->close();
         }
 
         return $rows;
