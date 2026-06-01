@@ -39,7 +39,6 @@
         <div class="modal-warning">
             <h2>HIMBAUAN DALAM MENYIKAPI PENGUMUMAN KELULUSAN</h2>
             <ol>
-                <li>Membuka link kelulusan sesuai jam yang ditentukan;</li>
                 <li>Mensyukuri karunia Alloh SWT atas kelulusan yang diperoleh;</li>
                 <li>Tidak melakukan konvoi, hura-hura, kumpul bareng merayakan kelulusan;</li>
                 <li>Dilarang melakukan coret-coret pakaian seragam atau apapun;</li>
@@ -458,18 +457,26 @@
         revealEls.forEach(el => observer.observe(el));
     });
 
-    // Kontrol Himbauan Modal dengan Persistence LocalStorage
+    // Kontrol Himbauan Modal yang Dipicu Saat Klik Cek Kelulusan
     document.addEventListener('DOMContentLoaded', function() {
         var modal = document.getElementById('modal-warning-overlay');
         var btn = document.getElementById('btn-modal-confirm');
         var checkbox = document.getElementById('modal-warning-checkbox');
+        var form = document.getElementById('graduation-form');
         
         if (modal && btn && checkbox) {
-            // Tampilkan modal hanya jika belum pernah menyetujui sebelumnya
-            if (localStorage.getItem('warning_accepted') === 'true') {
-                modal.style.display = 'none';
-            } else {
-                modal.style.display = 'flex';
+            // Modal disembunyikan di awal (default CSS display:none)
+            modal.style.display = 'none';
+
+            // Intersept pengiriman formulir cek kelulusan
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Jika belum pernah menyetujui, hentikan submit dan tampilkan modal himbauan
+                    if (localStorage.getItem('warning_accepted') !== 'true') {
+                        e.preventDefault();
+                        modal.style.display = 'flex';
+                    }
+                });
             }
 
             btn.disabled = !checkbox.checked;
@@ -479,6 +486,11 @@
             btn.addEventListener('click', function() {
                 modal.style.display = 'none';
                 localStorage.setItem('warning_accepted', 'true');
+                
+                // Kirim formulir setelah siswa menyetujui himbauan
+                if (form) {
+                    form.submit();
+                }
             });
         }
 
