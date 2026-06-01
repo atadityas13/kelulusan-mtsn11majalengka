@@ -448,7 +448,10 @@ class AdminController extends Controller
         }
 
         if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('uploads/foto_siswa', 'public');
+            $file = $request->file('foto');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/foto_siswa'), $fileName);
+            $data['foto'] = 'uploads/foto_siswa/' . $fileName;
         }
 
         Student::create($data);
@@ -487,7 +490,10 @@ class AdminController extends Controller
         }
 
         if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('uploads/foto_siswa', 'public');
+            $file = $request->file('foto');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/foto_siswa'), $fileName);
+            $data['foto'] = 'uploads/foto_siswa/' . $fileName;
         }
 
         $student->update($data);
@@ -739,7 +745,7 @@ class AdminController extends Controller
             'skipped' => 0
         ];
 
-        $uploadDir = storage_path('app/public/uploads/foto_siswa');
+        $uploadDir = public_path('uploads/foto_siswa');
 
         // Buat direktori jika belum ada
         if (!is_dir($uploadDir)) {
