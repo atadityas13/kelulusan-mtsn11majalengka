@@ -67,10 +67,10 @@
             <div class="modal-warning-checkbox-group">
                 <input type="checkbox" id="modal-warning-checkbox">
                 <label for="modal-warning-checkbox" style="user-select: none;">
-                    Saya <b>{{ $foundStudent->nama }}</b>, menyatakan dengan sungguh-sungguh bahwa saya akan menaati semua himbauan, dan apabila melanggar saya siap menanggung segala konsekuensinya.
+                    Saya <b>{{ $foundStudent->nama }}</b>, menyatakan dengan sungguh-sungguh bahwa tanda tangan yang saya bubuhkan diatas adalah benar serta saya akan menaati semua himbauan, dan apabila melanggar saya siap untuk menanggung segala konsekuensi sesuai peraturan yang berlaku.
                 </label>
             </div>
-            <button class="btn-modal-confirm" id="btn-modal-confirm" disabled>Mengerti</button>
+            <button class="btn-modal-confirm" id="btn-modal-confirm" disabled>Setuju</button>
         </div>
     </div>
     @endif
@@ -487,28 +487,47 @@
             var ctx = canvas.getContext('2d');
 
             function resizeCanvas() {
-                var rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width;
-                canvas.height = rect.height;
-                ctx.strokeStyle = '#1e3a8a'; // Tinta biru tua
+                var w = canvas.clientWidth;
+                var h = canvas.clientHeight;
+                
+                // Jika masih 0 karena durasi/animasi transisi modal, gunakan fallback aman
+                if (w === 0) w = canvas.offsetWidth || 550;
+                if (h === 0) h = canvas.offsetHeight || 180;
+
+                canvas.width = w;
+                canvas.height = h;
+
+                // Tinta warna hitam sesuai permintaan user
+                ctx.strokeStyle = '#000000'; 
                 ctx.lineWidth = 3;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
             }
 
-            setTimeout(resizeCanvas, 300);
+            // Inisialisasi awal
+            setTimeout(resizeCanvas, 350);
             window.addEventListener('resize', resizeCanvas);
 
+            // Bersihkan tanda tangan
             btnClear.addEventListener('click', function() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 hasSigned = false;
                 validateAgreement();
             });
 
+            // Akurasi koordinat sentuhan & mouse
             function getCoords(e) {
                 var rect = canvas.getBoundingClientRect();
-                var clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                var clientX, clientY;
+                
+                if (e.touches && e.touches.length > 0) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                
                 return {
                     x: clientX - rect.left,
                     y: clientY - rect.top
@@ -516,11 +535,16 @@
             }
 
             function startDrawing(e) {
+                // Paksa resize jika saat disentuh pertama kali ukuran pixel internal masih 0
+                if (canvas.width === 0 || canvas.height === 0) {
+                    resizeCanvas();
+                }
                 isDrawing = true;
                 var coords = getCoords(e);
                 ctx.beginPath();
                 ctx.moveTo(coords.x, coords.y);
-                e.preventDefault();
+                // Mencegah scroll layar HP saat sedang menggambar tanda tangan
+                if (e.cancelable) e.preventDefault();
             }
 
             function draw(e) {
@@ -530,20 +554,22 @@
                 ctx.stroke();
                 hasSigned = true;
                 validateAgreement();
-                e.preventDefault();
+                if (e.cancelable) e.preventDefault();
             }
 
             function stopDrawing() {
                 isDrawing = false;
             }
 
+            // Mouse Event Listeners
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseleave', stopDrawing);
 
-            canvas.addEventListener('touchstart', startDrawing);
-            canvas.addEventListener('touchmove', draw);
+            // Touch Event Listeners (HP & Tablet)
+            canvas.addEventListener('touchstart', startDrawing, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
             canvas.addEventListener('touchend', stopDrawing);
         }
 
@@ -579,12 +605,12 @@
                     } else {
                         alert('Gagal menyimpan tanda tangan: ' + data.message);
                         btn.disabled = false;
-                        btn.textContent = 'Mengerti';
+                        btn.textContent = 'Setuju';
                     }
                 } catch (e) {
                     alert('Gagal terhubung ke server.');
                     btn.disabled = false;
-                    btn.textContent = 'Mengerti';
+                    btn.textContent = 'Setuju';
                 }
             });
         }
