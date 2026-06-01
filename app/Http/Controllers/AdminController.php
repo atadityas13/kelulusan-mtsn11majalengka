@@ -204,6 +204,7 @@ class AdminController extends Controller
 
         $columns = array_merge($dataColumns, array_keys($subjectCodes));
 
+        // Sample data: includes all basic fields and exactly 15 grades (including BSD = 91)
         $sampleData = [
             [
                 '25-10-10-2-0089-0001',
@@ -214,7 +215,7 @@ class AdminController extends Controller
                 'Laki-laki',
                 'Lulus',
                 'SKL-2026-001',
-                88, 90, 85, 87, 92, 89, 86, 93, 91, 90, 88, 89, 87, 90,
+                88, 90, 85, 87, 92, 89, 86, 93, 91, 90, 88, 89, 87, 90, 91
             ]
         ];
 
@@ -268,38 +269,61 @@ class AdminController extends Controller
     private function getWorksheetXml($columns, $dataColumns, $subjectCodes, $data)
     {
         $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-<sheetData>';
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
 
-        // ROW 1: Data column headers + merged title untuk nilai
+        // Set optimal column widths to make headers fully readable and beautiful
+        $xml .= '<cols>';
+        $xml .= '<col min="1" max="1" width="26" customWidth="1"/>'; // nomor_peserta
+        $xml .= '<col min="2" max="2" width="16" customWidth="1"/>'; // nisn
+        $xml .= '<col min="3" max="3" width="28" customWidth="1"/>'; // nama
+        $xml .= '<col min="4" max="4" width="18" customWidth="1"/>'; // tempat_lahir
+        $xml .= '<col min="5" max="5" width="16" customWidth="1"/>'; // tanggal_lahir
+        $xml .= '<col min="6" max="6" width="15" customWidth="1"/>'; // jenis_kelamin
+        $xml .= '<col min="7" max="7" width="18" customWidth="1"/>'; // status_kelulusan
+        $xml .= '<col min="8" max="8" width="22" customWidth="1"/>'; // nomor_skl
+        // Subject columns (9 to 23)
+        for ($i = 9; $i <= 23; $i++) {
+            $xml .= '<col min="' . $i . '" max="' . $i . '" width="10" customWidth="1"/>';
+        }
+        $xml .= '</cols>';
+
+        $xml .= '<sheetData>';
+
         $dataCount = count($dataColumns);
         $subjectCount = count($subjectCodes);
         $firstSubjectCol = $dataCount;
         $lastSubjectCol = $dataCount + $subjectCount - 1;
 
-        $xml .= '<row r="1">';
+        // ROW 1: Data column headers + merged title untuk nilai
+        $xml .= '<row r="1" ht="25" customHeight="1">';
         
         // Data column headers
         for ($i = 0; $i < $dataCount; $i++) {
             $colLetter = $this->getExcelColumn($i);
-            $header = $dataColumns[$i];
+            $header = strtoupper(str_replace('_', ' ', $dataColumns[$i]));
             $xml .= '<c r="' . $colLetter . '1" t="str" s="1"><v>' . htmlspecialchars($header, ENT_XML1) . '</v></c>';
         }
         
         // Merged title untuk nilai (hanya di kolom pertama subject)
         $firstSubjectColLetter = $this->getExcelColumn($firstSubjectCol);
         $lastSubjectColLetter = $this->getExcelColumn($lastSubjectCol);
-        $xml .= '<c r="' . $firstSubjectColLetter . '1" t="str" s="1"><v>Nilai Mata Pelajaran Transkrip</v></c>';
+        $xml .= '<c r="' . $firstSubjectColLetter . '1" t="str" s="1"><v>NILAI MATA PELAJARAN (TRANSKRIP)</v></c>';
+        
+        // Buat empty cells untuk merged cells agar Excel merender dengan border & style yang pas
+        for ($i = $firstSubjectCol + 1; $i <= $lastSubjectCol; $i++) {
+            $colLetter = $this->getExcelColumn($i);
+            $xml .= '<c r="' . $colLetter . '1" t="str" s="1"/>';
+        }
         
         $xml .= '</row>';
 
         // ROW 2: Kosong untuk data columns, subject codes untuk nilai
-        $xml .= '<row r="2">';
+        $xml .= '<row r="2" ht="20" customHeight="1">';
         
         // Data columns (empty)
         for ($i = 0; $i < $dataCount; $i++) {
             $colLetter = $this->getExcelColumn($i);
-            $xml .= '<c r="' . $colLetter . '2" t="str"/>';
+            $xml .= '<c r="' . $colLetter . '2" t="str" s="1"/>';
         }
         
         // Subject codes
@@ -328,10 +352,19 @@ class AdminController extends Controller
             $rowNum++;
         }
 
-        // Add mergeCells for title
-        $xml .= '<mergeCells><mergeCell ref="' . $firstSubjectColLetter . '1:' . $lastSubjectColLetter . '1"/></mergeCells>';
+        $xml .= '</sheetData>';
 
-        $xml .= '</sheetData></worksheet>';
+        // Add mergeCells for title
+        $xml .= '<mergeCells>';
+        $xml .= '<mergeCell ref="' . $firstSubjectColLetter . '1:' . $lastSubjectColLetter . '1"/>';
+        // Vertically merge data columns row 1 and row 2 for sleek professional look
+        for ($i = 0; $i < $dataCount; $i++) {
+            $colLetter = $this->getExcelColumn($i);
+            $xml .= '<mergeCell ref="' . $colLetter . '1:' . $colLetter . '2"/>';
+        }
+        $xml .= '</mergeCells>';
+
+        $xml .= '</worksheet>';
 
         return $xml;
     }
@@ -340,10 +373,23 @@ class AdminController extends Controller
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<fonts><font><sz val="11"/><color theme="1"/><name val="Calibri"/><family val="2"/></font></fonts>
-<fills><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFD3D3D3"/></patternFill></fill></fills>
-<borders><border><left/><right/><top/><bottom/><diagonal/></border></borders>
-<cellXfs><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/><xf numFmtId="0" fontId="0" fillId="2" borderId="0" applyFill="1" applyFont="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs>
+<fonts>
+  <font><sz val="11"/><name val="Calibri"/><family val="2"/></font>
+  <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/><family val="2"/></font>
+</fonts>
+<fills>
+  <fill><patternFill patternType="none"/></fill>
+  <fill><patternFill patternType="gray125"/></fill>
+  <fill><patternFill patternType="solid"><fgColor rgb="FF2B4C7E"/></patternFill></fill>
+</fills>
+<borders>
+  <border><left/><right/><top/><bottom/><diagonal/></border>
+  <border><left style="thin"><color rgb="FFD3D3D3"/></left><right style="thin"><color rgb="FFD3D3D3"/></right><top style="thin"><color rgb="FFD3D3D3"/></top><bottom style="thin"><color rgb="FFD3D3D3"/></bottom></border>
+</borders>
+<cellXfs>
+  <xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>
+  <xf numFmtId="0" fontId="1" fillId="2" borderId="1" applyFill="1" applyFont="1" applyBorder="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+</cellXfs>
 </styleSheet>';
     }
 
@@ -719,21 +765,54 @@ class AdminController extends Controller
         return $result;
     }
 
+    private function excelColumnIndex($col)
+    {
+        $col = strtoupper($col);
+        $len = strlen($col);
+        $index = 0;
+        for ($i = 0; $i < $len; $i++) {
+            $index = $index * 26 + (ord($col[$i]) - 64);
+        }
+        return $index - 1;
+    }
+
     private function parseCsvFile(string $path): array
     {
         $rows = [];
 
         if (($handle = fopen($path, 'r')) !== false) {
             $header = null;
+            $rowNum = 0;
+            $firstRowValues = [];
 
             while (($line = fgetcsv($handle, 0, ',')) !== false) {
-                if (!$header) {
-                    $header = array_map([$this, 'normalizeImportHeader'], $line);
+                $rowNum++;
+
+                if ($rowNum === 1) {
+                    $firstRowValues = $line;
                     continue;
                 }
 
-                $line = array_pad($line, count($header), '');
-                $rows[] = array_combine($header, $line);
+                if ($rowNum === 2) {
+                    // Build double-row header
+                    $header = [];
+                    // First 8 columns from Row 1
+                    for ($i = 0; $i < 8; $i++) {
+                        $header[$i] = $this->normalizeImportHeader($firstRowValues[$i] ?? '');
+                    }
+                    // Remaining columns (subjects) from Row 2
+                    $totalCols = max(count($firstRowValues), count($line));
+                    for ($i = 8; $i < $totalCols; $i++) {
+                        $header[$i] = $this->normalizeImportHeader($line[$i] ?? $firstRowValues[$i] ?? '');
+                    }
+                    continue;
+                }
+
+                if ($header) {
+                    $line = array_pad($line, count($header), '');
+                    $line = array_slice($line, 0, count($header));
+                    $rows[] = array_combine($header, $line);
+                }
             }
 
             fclose($handle);
@@ -756,23 +835,55 @@ class AdminController extends Controller
             $xml = simplexml_load_string($sheetXml);
             $header = null;
             $rowNum = 0;
+            $firstRowValues = [];
 
             foreach ($xml->sheetData->row as $row) {
                 $rowNum++;
                 $values = [];
 
+                // Parse cell elements and place them into exact column index to prevent misalignment with empty cells
                 foreach ($row->c as $cell) {
+                    $rAttr = (string)$cell['r'];
+                    preg_match('/([A-Z]+)/', $rAttr, $matches);
+                    $colLetter = $matches[1] ?? 'A';
+                    $colIdx = $this->excelColumnIndex($colLetter);
+                    
                     $cellValue = (string) $cell->v;
-                    $values[] = $cellValue;
+                    $values[$colIdx] = $cellValue;
                 }
 
+                // Fill gaps & sort by column index
+                $maxKey = !empty($values) ? max(array_keys($values)) : 0;
+                for ($i = 0; $i <= $maxKey; $i++) {
+                    if (!isset($values[$i])) {
+                        $values[$i] = '';
+                    }
+                }
+                ksort($values);
+
                 if ($rowNum === 1) {
-                    $header = array_map([$this, 'normalizeImportHeader'], $values);
+                    $firstRowValues = $values;
+                    continue;
+                }
+
+                if ($rowNum === 2) {
+                    // Build double-row header
+                    $header = [];
+                    // First 8 columns from Row 1
+                    for ($i = 0; $i < 8; $i++) {
+                        $header[$i] = $this->normalizeImportHeader($firstRowValues[$i] ?? '');
+                    }
+                    // Remaining columns (subjects) from Row 2
+                    $totalCols = max(count($firstRowValues), count($values));
+                    for ($i = 8; $i < $totalCols; $i++) {
+                        $header[$i] = $this->normalizeImportHeader($values[$i] ?? $firstRowValues[$i] ?? '');
+                    }
                     continue;
                 }
 
                 if ($header) {
                     $values = array_pad($values, count($header), '');
+                    $values = array_slice($values, 0, count($header));
                     $rows[] = array_combine($header, $values);
                 }
             }
