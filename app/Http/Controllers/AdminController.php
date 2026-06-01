@@ -211,8 +211,8 @@ class AdminController extends Controller
                 '0098765432',
                 'Ahmad Fajar',
                 'Majalengka',
-                '2008-03-15',
-                'Laki-laki',
+                '15-03-2008',
+                'L',
                 'Lulus',
                 'SKL-2026-001',
                 88, 90, 85, 87, 92, 89, 86, 93, 91, 90, 88, 89, 87, 90, 91
@@ -624,14 +624,35 @@ class AdminController extends Controller
                 if (!$exists) {
                     $nisn = trim($this->getImportValue($student, ['nisn']));
 
+                    // Normalize Gender (L/P or Laki-laki/Perempuan)
+                    $genderRaw = trim($this->getImportValue($student, ['jenis_kelamin'], 'L'));
+                    $gender = 'Laki-laki';
+                    if (strcasecmp($genderRaw, 'P') === 0 || strcasecmp($genderRaw, 'Perempuan') === 0) {
+                        $gender = 'Perempuan';
+                    }
+
+                    // Normalize Date of Birth (DD-MM-YYYY or any other format)
+                    $dobRaw = trim($this->getImportValue($student, ['tanggal_lahir'], ''));
+                    $dob = date('Y-m-d');
+                    if (!empty($dobRaw)) {
+                        if (preg_match('/^(\d{1,2})[\-\/\.](\d{1,2})[\-\/\.](\d{4})$/', $dobRaw, $matches)) {
+                            $dob = sprintf('%04d-%02d-%02d', $matches[3], $matches[2], $matches[1]);
+                        } else {
+                            $timestamp = strtotime($dobRaw);
+                            if ($timestamp !== false) {
+                                $dob = date('Y-m-d', $timestamp);
+                            }
+                        }
+                    }
+
                     $studentRecord = Student::create([
                         'academic_year_id' => $yearId,
                         'nomor_peserta' => $nopes,
                         'nisn' => $nisn,
                         'nama' => trim($this->getImportValue($student, ['nama', 'nama_lengkap'], 'Tanpa Nama')),
-                        'jenis_kelamin' => $this->getImportValue($student, ['jenis_kelamin'], 'Laki-laki'),
+                        'jenis_kelamin' => $gender,
                         'tempat_lahir' => trim($this->getImportValue($student, ['tempat_lahir'], 'Majalengka')),
-                        'tanggal_lahir' => $this->getImportValue($student, ['tanggal_lahir'], date('Y-m-d')),
+                        'tanggal_lahir' => $dob,
                         'kelas' => trim($this->getImportValue($student, ['kelas'], 'IX')),
                         'foto' => null,
                         'status_kelulusan' => $this->getImportValue($student, ['status_kelulusan'], 'Lulus'),
