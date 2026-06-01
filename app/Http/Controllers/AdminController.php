@@ -171,32 +171,38 @@ class AdminController extends Controller
 
     private function createExcelTemplate()
     {
-        $columns = [
+        // Data columns (tanpa foto, dipisah di import foto)
+        $dataColumns = [
             'nomor_peserta',
             'nisn',
             'nama',
             'tempat_lahir',
             'tanggal_lahir',
             'jenis_kelamin',
-            'foto',
             'status_kelulusan',
             'nomor_skl',
-            'Pendidikan Agama Islam - Al Qur\'an Hadis',
-            'Pendidikan Agama Islam - Akidah Akhlak',
-            'Pendidikan Agama Islam - Fikih',
-            'Pendidikan Agama Islam - Sejarah Kebudayaan Islam',
-            'Pendidikan Pancasila',
-            'Bahasa Indonesia',
-            'Bahasa Arab',
-            'Matematika',
-            'Ilmu Pengetahuan Alam',
-            'Ilmu Pengetahuan Sosial',
-            'Bahasa Inggris',
-            'Seni dan Prakarya',
-            'Pendidikan Jasmani Olahraga dan Kesehatan',
-            'Informatika',
-            'Muatan Lokal - Bahasa Sunda',
         ];
+
+        // Subject codes dan mapping
+        $subjectCodes = [
+            'QH' => 'agama_al_quran_hadis',
+            'AA' => 'agama_akidah_akhlak',
+            'FIK' => 'agama_fikih',
+            'SKI' => 'agama_sejarah_kebudayaan_islam',
+            'PP' => 'pendidikan_pancasila',
+            'BIND' => 'bahasa_indonesia',
+            'BAR' => 'bahasa_arab',
+            'MTK' => 'matematika',
+            'IPA' => 'ilmu_pengetahuan_alam',
+            'IPS' => 'ilmu_pengetahuan_sosial',
+            'BING' => 'bahasa_inggris',
+            'SP' => 'seni_dan_prakarya',
+            'PJOK' => 'pendidikan_jasmani_olahraga_dan_kesehatan',
+            'INFO' => 'informatika',
+            'BSD' => 'muatan_lokal_bahasa_sunda',
+        ];
+
+        $columns = array_merge($dataColumns, array_keys($subjectCodes));
 
         $sampleData = [
             [
@@ -206,7 +212,6 @@ class AdminController extends Controller
                 'Majalengka',
                 '2008-03-15',
                 'Laki-laki',
-                '',
                 'Lulus',
                 'SKL-2026-001',
                 88, 90, 85, 87, 92, 89, 86, 93, 91, 90, 88, 89, 87, 90,
@@ -220,7 +225,7 @@ class AdminController extends Controller
             $zip->addFromString('_rels/.rels', $this->getRelationshipsXml());
             $zip->addFromString('xl/_rels/workbook.xml.rels', $this->getWorkbookRelationshipsXml());
             $zip->addFromString('xl/workbook.xml', $this->getWorkbookXml());
-            $zip->addFromString('xl/worksheets/sheet1.xml', $this->getWorksheetXml($columns, $sampleData));
+            $zip->addFromString('xl/worksheets/sheet1.xml', $this->getWorksheetXml($columns, $dataColumns, $subjectCodes, $sampleData));
             $zip->addFromString('xl/styles.xml', $this->getStylesXml());
             $zip->addFromString('[Content_Types].xml', $this->getContentTypesXml());
             $zip->close();
@@ -260,19 +265,55 @@ class AdminController extends Controller
 </workbook>';
     }
 
-    private function getWorksheetXml($columns, $data)
+    private function getWorksheetXml($columns, $dataColumns, $subjectCodes, $data)
     {
         $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 <sheetData>';
 
+        // ROW 1: Data column headers + merged title untuk nilai
+        $dataCount = count($dataColumns);
+        $subjectCount = count($subjectCodes);
+        $firstSubjectCol = $dataCount;
+        $lastSubjectCol = $dataCount + $subjectCount - 1;
+
         $xml .= '<row r="1">';
-        foreach ($columns as $col => $header) {
-            $xml .= '<c r="' . $this->getExcelColumn($col) . '1" t="str" s="1"><v>' . htmlspecialchars($header, ENT_XML1) . '</v></c>';
+        
+        // Data column headers
+        for ($i = 0; $i < $dataCount; $i++) {
+            $colLetter = $this->getExcelColumn($i);
+            $header = $dataColumns[$i];
+            $xml .= '<c r="' . $colLetter . '1" t="str" s="1"><v>' . htmlspecialchars($header, ENT_XML1) . '</v></c>';
         }
+        
+        // Merged title untuk nilai (hanya di kolom pertama subject)
+        $firstSubjectColLetter = $this->getExcelColumn($firstSubjectCol);
+        $lastSubjectColLetter = $this->getExcelColumn($lastSubjectCol);
+        $xml .= '<c r="' . $firstSubjectColLetter . '1" t="str" s="1"><v>Nilai Mata Pelajaran Transkrip</v></c>';
+        
         $xml .= '</row>';
 
-        $rowNum = 2;
+        // ROW 2: Kosong untuk data columns, subject codes untuk nilai
+        $xml .= '<row r="2">';
+        
+        // Data columns (empty)
+        for ($i = 0; $i < $dataCount; $i++) {
+            $colLetter = $this->getExcelColumn($i);
+            $xml .= '<c r="' . $colLetter . '2" t="str"/>';
+        }
+        
+        // Subject codes
+        $subjectIdx = 0;
+        foreach (array_keys($subjectCodes) as $code) {
+            $colLetter = $this->getExcelColumn($firstSubjectCol + $subjectIdx);
+            $xml .= '<c r="' . $colLetter . '2" t="str" s="1"><v>' . htmlspecialchars($code, ENT_XML1) . '</v></c>';
+            $subjectIdx++;
+        }
+        
+        $xml .= '</row>';
+
+        // ROW 3+: Sample data
+        $rowNum = 3;
         foreach ($data as $row) {
             $xml .= '<row r="' . $rowNum . '">';
             foreach ($row as $col => $value) {
@@ -286,6 +327,9 @@ class AdminController extends Controller
             $xml .= '</row>';
             $rowNum++;
         }
+
+        // Add mergeCells for title
+        $xml .= '<mergeCells><mergeCell ref="' . $firstSubjectColLetter . '1:' . $lastSubjectColLetter . '1"/></mergeCells>';
 
         $xml .= '</sheetData></worksheet>';
 
@@ -411,7 +455,80 @@ class AdminController extends Controller
         return back()->with('success', 'Siswa berhasil dihapus dari database.');
     }
 
-    public function importStudents(Request $request)
+    public function getStudentGrades($id)
+    {
+        $student = Student::findOrFail($id);
+        $grades = StudentGrade::where('student_id', $id)->first();
+
+        $gradeArray = [
+            'agama_al_quran_hadis' => null,
+            'agama_akidah_akhlak' => null,
+            'agama_fikih' => null,
+            'agama_sejarah_kebudayaan_islam' => null,
+            'pendidikan_pancasila' => null,
+            'bahasa_indonesia' => null,
+            'bahasa_arab' => null,
+            'matematika' => null,
+            'ilmu_pengetahuan_alam' => null,
+            'ilmu_pengetahuan_sosial' => null,
+            'bahasa_inggris' => null,
+            'seni_dan_prakarya' => null,
+            'pendidikan_jasmani_olahraga_dan_kesehatan' => null,
+            'informatika' => null,
+            'muatan_lokal_bahasa_sunda' => null,
+        ];
+
+        if ($grades) {
+            foreach ($gradeArray as $key => &$value) {
+                $value = $grades->$key;
+            }
+        }
+
+        return response()->json([
+            'student' => $student,
+            'grades' => $gradeArray
+        ]);
+    }
+
+    public function updateStudentGrades(Request $request)
+    {
+        $student = Student::findOrFail($request->student_id);
+        $academicYearId = $student->academic_year_id;
+
+        $gradeData = [
+            'agama_al_quran_hadis' => $request->agama_al_quran_hadis,
+            'agama_akidah_akhlak' => $request->agama_akidah_akhlak,
+            'agama_fikih' => $request->agama_fikih,
+            'agama_sejarah_kebudayaan_islam' => $request->agama_sejarah_kebudayaan_islam,
+            'pendidikan_pancasila' => $request->pendidikan_pancasila,
+            'bahasa_indonesia' => $request->bahasa_indonesia,
+            'bahasa_arab' => $request->bahasa_arab,
+            'matematika' => $request->matematika,
+            'ilmu_pengetahuan_alam' => $request->ilmu_pengetahuan_alam,
+            'ilmu_pengetahuan_sosial' => $request->ilmu_pengetahuan_sosial,
+            'bahasa_inggris' => $request->bahasa_inggris,
+            'seni_dan_prakarya' => $request->seni_dan_prakarya,
+            'pendidikan_jasmani_olahraga_dan_kesehatan' => $request->pendidikan_jasmani_olahraga_dan_kesehatan,
+            'informatika' => $request->informatika,
+            'muatan_lokal_bahasa_sunda' => $request->muatan_lokal_bahasa_sunda,
+        ];
+
+        // Filter out null/empty values
+        $gradeData = array_filter($gradeData, fn($v) => $v !== null && $v !== '');
+
+        $existing = StudentGrade::where('student_id', $request->student_id)->first();
+
+        if ($existing) {
+            $existing->update($gradeData);
+        } else {
+            $gradeData['student_id'] = $request->student_id;
+            $gradeData['academic_year_id'] = $academicYearId;
+            StudentGrade::create($gradeData);
+        }
+
+        return back()->with('success', 'Nilai siswa berhasil diperbarui.');
+    }
+
     {
         $request->validate([
             'json_file' => 'required|file|mimes:xlsx,xls,csv,json',
@@ -458,6 +575,8 @@ class AdminController extends Controller
                     })->exists();
 
                 if (!$exists) {
+                    $nisn = trim($this->getImportValue($student, ['nisn']));
+
                     $studentRecord = Student::create([
                         'academic_year_id' => $yearId,
                         'nomor_peserta' => $nopes,
@@ -467,7 +586,7 @@ class AdminController extends Controller
                         'tempat_lahir' => trim($this->getImportValue($student, ['tempat_lahir'], 'Majalengka')),
                         'tanggal_lahir' => $this->getImportValue($student, ['tanggal_lahir'], date('Y-m-d')),
                         'kelas' => trim($this->getImportValue($student, ['kelas'], 'IX')),
-                        'foto' => trim($this->getImportValue($student, ['foto'], '')),
+                        'foto' => null,
                         'status_kelulusan' => $this->getImportValue($student, ['status_kelulusan'], 'Lulus'),
                         'nomor_skl' => trim($this->getImportValue($student, ['nomor_skl', 'no_skl'], '')),
                         'release_timestamp' => $this->getImportValue($student, ['release_timestamp'], null),
@@ -476,21 +595,21 @@ class AdminController extends Controller
                     $gradeData = [
                         'student_id' => $studentRecord->id,
                         'academic_year_id' => $yearId,
-                        'agama_al_quran_hadis' => $this->getImportValue($student, ['agama_al_quran_hadis', 'pendidikan_agama_islam_al_qur_an_hadis', 'pendidikan_agama_islam_al_quran_hadis']),
-                        'agama_akidah_akhlak' => $this->getImportValue($student, ['agama_akidah_akhlak', 'pendidikan_agama_islam_akidah_akhlak']),
-                        'agama_fikih' => $this->getImportValue($student, ['agama_fikih', 'pendidikan_agama_islam_fikih']),
-                        'agama_sejarah_kebudayaan_islam' => $this->getImportValue($student, ['agama_sejarah_kebudayaan_islam', 'pendidikan_agama_islam_sejarah_kebudayaan_islam']),
-                        'pendidikan_pancasila' => $this->getImportValue($student, ['pendidikan_pancasila']),
-                        'bahasa_indonesia' => $this->getImportValue($student, ['bahasa_indonesia']),
-                        'bahasa_arab' => $this->getImportValue($student, ['bahasa_arab']),
-                        'matematika' => $this->getImportValue($student, ['matematika']),
-                        'ilmu_pengetahuan_alam' => $this->getImportValue($student, ['ilmu_pengetahuan_alam']),
-                        'ilmu_pengetahuan_sosial' => $this->getImportValue($student, ['ilmu_pengetahuan_sosial']),
-                        'bahasa_inggris' => $this->getImportValue($student, ['bahasa_inggris']),
-                        'seni_dan_prakarya' => $this->getImportValue($student, ['seni_dan_prakarya']),
-                        'pendidikan_jasmani_olahraga_dan_kesehatan' => $this->getImportValue($student, ['pendidikan_jasmani_olahraga_dan_kesehatan']),
-                        'informatika' => $this->getImportValue($student, ['informatika']),
-                        'muatan_lokal_bahasa_sunda' => $this->getImportValue($student, ['muatan_lokal_bahasa_sunda', 'muatan_lokal_bahasa_sunda']),
+                        'agama_al_quran_hadis' => $this->getImportValue($student, ['agama_al_quran_hadis', 'qh', 'pendidikan_agama_islam_al_qur_an_hadis', 'pendidikan_agama_islam_al_quran_hadis']),
+                        'agama_akidah_akhlak' => $this->getImportValue($student, ['agama_akidah_akhlak', 'aa', 'pendidikan_agama_islam_akidah_akhlak']),
+                        'agama_fikih' => $this->getImportValue($student, ['agama_fikih', 'fik', 'pendidikan_agama_islam_fikih']),
+                        'agama_sejarah_kebudayaan_islam' => $this->getImportValue($student, ['agama_sejarah_kebudayaan_islam', 'ski', 'pendidikan_agama_islam_sejarah_kebudayaan_islam']),
+                        'pendidikan_pancasila' => $this->getImportValue($student, ['pendidikan_pancasila', 'pp']),
+                        'bahasa_indonesia' => $this->getImportValue($student, ['bahasa_indonesia', 'bind']),
+                        'bahasa_arab' => $this->getImportValue($student, ['bahasa_arab', 'bar']),
+                        'matematika' => $this->getImportValue($student, ['matematika', 'mtk']),
+                        'ilmu_pengetahuan_alam' => $this->getImportValue($student, ['ilmu_pengetahuan_alam', 'ipa']),
+                        'ilmu_pengetahuan_sosial' => $this->getImportValue($student, ['ilmu_pengetahuan_sosial', 'ips']),
+                        'bahasa_inggris' => $this->getImportValue($student, ['bahasa_inggris', 'bing']),
+                        'seni_dan_prakarya' => $this->getImportValue($student, ['seni_dan_prakarya', 'sp']),
+                        'pendidikan_jasmani_olahraga_dan_kesehatan' => $this->getImportValue($student, ['pendidikan_jasmani_olahraga_dan_kesehatan', 'pjok']),
+                        'informatika' => $this->getImportValue($student, ['informatika', 'info']),
+                        'muatan_lokal_bahasa_sunda' => $this->getImportValue($student, ['muatan_lokal_bahasa_sunda', 'bsd']),
                     ];
 
                     $gradeValues = array_filter(array_slice($gradeData, 2), fn($value) => $value !== null && $value !== '');
@@ -507,6 +626,95 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memproses import data: ' . $e->getMessage());
         }
+    }
+
+    public function importPhotos(Request $request)
+    {
+        $request->validate([
+            'photos_zip' => 'required|file|mimes:zip',
+            'academic_year_id' => 'required|exists:academic_years,id'
+        ]);
+
+        try {
+            $result = $this->processPhotosZip($request->file('photos_zip'));
+            
+            return back()->with('success', "Import foto selesai. {$result['count']} foto berhasil diimpor. {$result['skipped']} file dilewati (format tidak valid atau bukan gambar).");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memproses import foto: ' . $e->getMessage());
+        }
+
+    private function processPhotosZip($zipFile): array
+    {
+        $result = [
+            'map' => [],
+            'count' => 0,
+            'skipped' => 0
+        ];
+        
+        $uploadDir = storage_path('uploads/foto_siswa');
+
+        // Buat direktori jika belum ada
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $zip = new ZipArchive();
+        if ($zip->open($zipFile->getRealPath()) === true) {
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $filename = $zip->getNameIndex($i);
+
+                // Skip folder entries dan file di subfolder
+                if (strpos($filename, '/') !== false && substr($filename, -1) !== '/') {
+                    $filename = basename($filename);
+                }
+
+                if (substr($filename, -1) === '/') {
+                    continue; // Skip folders
+                }
+
+                // Get file extension
+                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+                // Validate extension
+                if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+                    $result['skipped']++;
+                    continue;
+                }
+
+                // Extract filename without extension (should be NISN)
+                $nisn = pathinfo($filename, PATHINFO_FILENAME);
+
+                // Read file content
+                $fileContent = $zip->getFromName($filename);
+                if ($fileContent === false) {
+                    $result['skipped']++;
+                    continue;
+                }
+
+                // Validate image
+                $tempPath = tempnam(sys_get_temp_dir(), 'photo');
+                file_put_contents($tempPath, $fileContent);
+
+                if (getimagesize($tempPath) === false) {
+                    unlink($tempPath);
+                    $result['skipped']++;
+                    continue; // Not a valid image
+                }
+
+                // Save dengan nama NISN.ext
+                $storagePath = "{$uploadDir}/{$nisn}.{$ext}";
+                copy($tempPath, $storagePath);
+                unlink($tempPath);
+
+                // Map NISN to storage path (relative to public)
+                $result['map'][$nisn] = "/uploads/foto_siswa/{$nisn}.{$ext}";
+                $result['count']++;
+            }
+
+            $zip->close();
+        }
+
+        return $result;
     }
 
     private function parseCsvFile(string $path): array

@@ -49,6 +49,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/students/edit/{id}', [AdminController::class, 'editStudent'])->name('admin.student.edit');
     Route::post('/students/delete/{id}', [AdminController::class, 'deleteStudent'])->name('admin.student.delete');
     Route::post('/students/import', [AdminController::class, 'importStudents'])->name('admin.student.import');
+    Route::post('/students/import-photos', [AdminController::class, 'importPhotos'])->name('admin.student.import-photos');
+    Route::get('/students/{id}/grades', [AdminController::class, 'getStudentGrades'])->name('admin.student.get-grades');
+    Route::post('/students/update-grades', [AdminController::class, 'updateStudentGrades'])->name('admin.student.update-grades');
 
     // Manajemen Tahun Ajaran (Academic Years CRUD)
     Route::post('/academic-years/add', [AdminController::class, 'addAcademicYear'])->name('admin.year.add');

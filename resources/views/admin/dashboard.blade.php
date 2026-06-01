@@ -344,7 +344,8 @@
                     <!-- Tindakan CRUD / Import -->
                     @if($selectedYear)
                         <div style="display:flex; gap:10px; margin-top:5px;">
-                            <button type="button" class="btn btn-secondary" onclick="openModal('importModal')"><i class="fa-solid fa-file-import"></i> Import Siswa</button>
+                            <button type="button" class="btn btn-secondary" onclick="openModal('importStudentModal')"><i class="fa-solid fa-file-import"></i> Import Siswa</button>
+                            <button type="button" class="btn btn-secondary" onclick="openModal('importPhotosModal')"><i class="fa-solid fa-image"></i> Import Foto</button>
                             <button type="button" class="btn btn-primary" onclick="openAddStudentModal()"><i class="fa-solid fa-plus"></i> Tambah Siswa</button>
                         </div>
                     @endif
@@ -356,13 +357,13 @@
                             <thead>
                                 <tr>
                                     <th>No.</th>
-                                    <th>No. Peserta</th>
+                                    <th>Foto</th>
+                                    <th>Nomor Peserta</th>
                                     <th>NISN</th>
                                     <th>Nama Lengkap</th>
-                                    <th>Kelas</th>
-                                    <th>No. SKL</th>
-                                    <th>Hasil</th>
-                                    <th>Waktu Rilis Batch</th>
+                                    <th>Tempat Lahir</th>
+                                    <th>Tanggal Lahir</th>
+                                    <th>Status</th>
                                     <th>Tindakan</th>
                                 </tr>
                             </thead>
@@ -372,21 +373,27 @@
                                     @foreach($studentsList as $student)
                                         <tr>
                                             <td>{{ $no++ }}</td>
+                                            <td style="text-align: center;">
+                                                @if($student->foto)
+                                                    <img src="{{ asset($student->foto) }}" alt="Foto {{ $student->nama }}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                                @else
+                                                    <span style="color: #ccc; font-size: 0.9em;">-</span>
+                                                @endif
+                                            </td>
                                             <td><strong>{{ $student->nomor_peserta }}</strong></td>
                                             <td>{{ $student->nisn }}</td>
                                             <td>{{ $student->nama }}</td>
-                                            <td>{{ $student->kelas }}</td>
+                                            <td>{{ $student->tempat_lahir }}</td>
+                                            <td>{{ $student->tanggal_lahir ? \Carbon\Carbon::parse($student->tanggal_lahir)->format('d-m-Y') : '-' }}</td>
                                             <td>
                                                 <span class="badge {{ $student->status_kelulusan === 'Lulus' ? 'badge-success' : ($student->status_kelulusan === 'Tidak Lulus' ? 'badge-danger' : 'badge-warning') }}">
                                                     {{ $student->status_kelulusan }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <small>{{ $student->release_timestamp ? $student->release_timestamp->format('d-m-Y H:i') : 'Default (Ikut Tanggal Target)' }}</small>
-                                            </td>
-                                            <td>
                                                 <div class="actions-cell">
-                                                    <button class="btn-icon" title="Edit" onclick='openEditStudentModal({{ json_encode($student) }})'><i class="fa-solid fa-pen-to-square"></i></button>
+                                                    <button class="btn-icon" title="Edit Detail Peserta" onclick='openEditStudentModal({{ json_encode($student) }})'><i class="fa-solid fa-user-pen"></i></button>
+                                                    <button class="btn-icon" title="Edit Daftar Nilai" onclick='openGradesModal({{ $student->id }})'><i class="fa-solid fa-list"></i></button>
                                                     <form action="{{ route('admin.student.delete', $student->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus siswa ini secara permanen?')" style="margin:0;">
                                                         @csrf
                                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus"><i class="fa-solid fa-trash"></i></button>
@@ -396,7 +403,7 @@
                                         </tr>
                                     @endforeach
                                 @else
-                                    <tr><td colspan="8" style="text-align: center; color: #888;">Data siswa kosong atau tidak ditemukan pada tahun ajaran ini.</td></tr>
+                                    <tr><td colspan="9" style="text-align: center; color: #888;">Data siswa kosong atau tidak ditemukan pada tahun ajaran ini.</td></tr>
                                 @endif
                             </tbody>
                         </table>
@@ -422,28 +429,142 @@
 
             @if($selectedYear)
                 <!-- MODAL IMPORT DATA SISWA -->
-                <div id="importModal" class="modal" style="display: none;">
+                <div id="importStudentModal" class="modal" style="display: none;">
                     <div class="modal-content">
                         <form action="{{ route('admin.student.import') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <input type="hidden" name="academic_year_id" value="{{ $selectedYearId }}">
                             <div class="modal-header">
-                                <h3>Import Siswa Lulusan Massal (CSV/JSON) - TA {{ $selectedYear->year }}</h3>
-                                <button type="button" class="modal-close" onclick="closeModal('importModal')">&times;</button>
+                                <h3>Import Data Siswa Lulusan - TA {{ $selectedYear->year }}</h3>
+                                <button type="button" class="modal-close" onclick="closeModal('importStudentModal')">&times;</button>
                             </div>
                             <div class="modal-body">
                                 <p style="font-size:0.9em; line-height: 1.5; color: var(--text-muted); margin-bottom: 12px;">
-                                    Silakan unggah berkas Excel (.xlsx) dengan format template yang benar. Template bisa diunduh di bawah, diisi menggunakan Microsoft Excel atau Google Sheets, kemudian diupload kembali.
+                                    Silakan unggah berkas Excel (.xlsx) dengan data siswa dan nilai. Template bisa diunduh di bawah, diisi menggunakan Microsoft Excel atau Google Sheets, kemudian diupload kembali.
                                 </p>
                                 <p style="font-size:0.9em; margin-bottom: 18px;"><a href="{{ route('admin.student.template') }}" download>Download template impor siswa (Excel)</a></p>
                                 <div class="form-group-db">
-                                    <label for="json_file">Pilih File Excel Template Siswa Lulusan</label>
+                                    <label for="json_file">Pilih File Excel Data Siswa</label>
                                     <input type="file" id="json_file" name="json_file" class="form-control" accept=".xlsx" required>
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" onclick="closeModal('importModal')">Batal</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeModal('importStudentModal')">Batal</button>
                                 <button type="submit" class="btn btn-primary">Mulai Import</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MODAL IMPORT FOTO SISWA -->
+                <div id="importPhotosModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <form action="{{ route('admin.student.import-photos') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" name="academic_year_id" value="{{ $selectedYearId }}">
+                            <div class="modal-header">
+                                <h3>Import Foto Siswa Lulusan - TA {{ $selectedYear->year }}</h3>
+                                <button type="button" class="modal-close" onclick="closeModal('importPhotosModal')">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p style="font-size:0.9em; line-height: 1.5; color: var(--text-muted); margin-bottom: 12px;">
+                                    Foto siswa diimpor dari file ZIP. Setiap file foto dalam ZIP harus dinamai dengan NISN siswa.
+                                </p>
+                                <p style="font-size:0.9em; margin-bottom: 18px;">
+                                    <strong>Contoh penamaan:</strong> 0098765432.jpg, 0098765433.png, 0098765434.jpeg
+                                </p>
+                                <div class="form-group-db">
+                                    <label for="photos_zip">Pilih File ZIP Foto Siswa</label>
+                                    <input type="file" id="photos_zip" name="photos_zip" class="form-control" accept=".zip" required>
+                                    <small style="color: var(--text-muted);">Format gambar yang didukung: JPG, JPEG, PNG, GIF</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" onclick="closeModal('importPhotosModal')">Batal</button>
+                                <button type="submit" class="btn btn-primary">Mulai Import Foto</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MODAL EDIT DAFTAR NILAI -->
+                <div id="gradesModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <form action="{{ route('admin.student.update-grades') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="student_id" id="gradesStudentId" value="">
+                            
+                            <div class="modal-header">
+                                <h3>Edit Daftar Nilai - <span id="gradesStudentName"></span></h3>
+                                <button type="button" class="modal-close" onclick="closeModal('gradesModal')">&times;</button>
+                            </div>
+                            <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                    <div class="form-group-db">
+                                        <label>QH (Al Qur'an Hadis)</label>
+                                        <input type="number" id="grade_agama_al_quran_hadis" name="agama_al_quran_hadis" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>AA (Akidah Akhlak)</label>
+                                        <input type="number" id="grade_agama_akidah_akhlak" name="agama_akidah_akhlak" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>FIK (Fikih)</label>
+                                        <input type="number" id="grade_agama_fikih" name="agama_fikih" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>SKI (Sejarah Kebudayaan Islam)</label>
+                                        <input type="number" id="grade_agama_sejarah_kebudayaan_islam" name="agama_sejarah_kebudayaan_islam" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>PP (Pendidikan Pancasila)</label>
+                                        <input type="number" id="grade_pendidikan_pancasila" name="pendidikan_pancasila" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>BIND (Bahasa Indonesia)</label>
+                                        <input type="number" id="grade_bahasa_indonesia" name="bahasa_indonesia" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>BAR (Bahasa Arab)</label>
+                                        <input type="number" id="grade_bahasa_arab" name="bahasa_arab" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>MTK (Matematika)</label>
+                                        <input type="number" id="grade_matematika" name="matematika" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>IPA (Ilmu Pengetahuan Alam)</label>
+                                        <input type="number" id="grade_ilmu_pengetahuan_alam" name="ilmu_pengetahuan_alam" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>IPS (Ilmu Pengetahuan Sosial)</label>
+                                        <input type="number" id="grade_ilmu_pengetahuan_sosial" name="ilmu_pengetahuan_sosial" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>BING (Bahasa Inggris)</label>
+                                        <input type="number" id="grade_bahasa_inggris" name="bahasa_inggris" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>SP (Seni dan Prakarya)</label>
+                                        <input type="number" id="grade_seni_dan_prakarya" name="seni_dan_prakarya" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>PJOK (Pendidikan Jasmani Olahraga Kesehatan)</label>
+                                        <input type="number" id="grade_pendidikan_jasmani_olahraga_dan_kesehatan" name="pendidikan_jasmani_olahraga_dan_kesehatan" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>INFO (Informatika)</label>
+                                        <input type="number" id="grade_informatika" name="informatika" min="0" max="100" class="form-control">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label>BSD (Muatan Lokal Bahasa Sunda)</label>
+                                        <input type="number" id="grade_muatan_lokal_bahasa_sunda" name="muatan_lokal_bahasa_sunda" min="0" max="100" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" onclick="closeModal('gradesModal')">Batal</button>
+                                <button type="submit" class="btn btn-primary">Simpan Nilai</button>
                             </div>
                         </form>
                     </div>
@@ -578,6 +699,31 @@
                         }
 
                         openModal('studentFormModal');
+                    }
+
+                    function openGradesModal(studentId) {
+                        // Fetch student grades
+                        fetch('/admin/students/' + studentId + '/grades')
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('gradesStudentId').value = studentId;
+                                document.getElementById('gradesStudentName').innerText = data.student.nama;
+                                
+                                // Populate grade inputs
+                                const subjects = ['agama_al_quran_hadis', 'agama_akidah_akhlak', 'agama_fikih', 'agama_sejarah_kebudayaan_islam', 'pendidikan_pancasila', 'bahasa_indonesia', 'bahasa_arab', 'matematika', 'ilmu_pengetahuan_alam', 'ilmu_pengetahuan_sosial', 'bahasa_inggris', 'seni_dan_prakarya', 'pendidikan_jasmani_olahraga_dan_kesehatan', 'informatika', 'muatan_lokal_bahasa_sunda'];
+                                
+                                subjects.forEach(subject => {
+                                    const input = document.getElementById('grade_' + subject);
+                                    if (input) {
+                                        input.value = data.grades[subject] || '';
+                                    }
+                                });
+                                
+                                openModal('gradesModal');
+                            })
+                            .catch(error => {
+                                alert('Gagal memuat data nilai: ' + error);
+                            });
                     }
                 </script>
             @endif
