@@ -643,6 +643,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memproses import foto: ' . $e->getMessage());
         }
+    }
 
     private function processPhotosZip($zipFile): array
     {
