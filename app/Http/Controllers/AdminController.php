@@ -129,6 +129,7 @@ class AdminController extends Controller
             'kepala_nama'    => Setting::get('kepala_nama', ''),
             'kepala_jabatan' => Setting::get('kepala_jabatan', ''),
             'kepala_pesan'   => Setting::get('kepala_pesan', ''),
+            'kepala_foto'    => Setting::get('kepala_foto', 'assets/kepalamadrasah.png'),
         ];
 
         return view('admin.dashboard', compact(
@@ -1146,6 +1147,7 @@ class AdminController extends Controller
             'kepala_nama'      => 'required|string|max:150',
             'kepala_jabatan'   => 'required|string|max:150',
             'kepala_pesan'     => 'required|string',
+            'kepala_foto'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Simpan pengaturan waktu & mode pemeliharaan ke tabel academic_years
@@ -1159,6 +1161,21 @@ class AdminController extends Controller
         Setting::set('kepala_nama', $data['kepala_nama']);
         Setting::set('kepala_jabatan', $data['kepala_jabatan']);
         Setting::set('kepala_pesan', $data['kepala_pesan']);
+
+        // Upload Foto Kepala Madrasah jika ada
+        if ($request->hasFile('kepala_foto')) {
+            $file = $request->file('kepala_foto');
+            $fileName = 'kepala_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assets'), $fileName);
+
+            // Delete old file if custom and exists
+            $oldFoto = Setting::get('kepala_foto');
+            if ($oldFoto && $oldFoto !== 'assets/kepalamadrasah.png' && file_exists(public_path($oldFoto))) {
+                @unlink(public_path($oldFoto));
+            }
+
+            Setting::set('kepala_foto', 'assets/' . $fileName);
+        }
 
         return back()->with('success', 'Pengaturan sistem dan data Kepala Madrasah berhasil diperbarui!');
     }

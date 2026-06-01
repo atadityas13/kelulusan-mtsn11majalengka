@@ -95,6 +95,7 @@ class HomeController extends Controller
             'name'     => Setting::get('kepala_nama', 'Kepala MTsN 11 Majalengka'),
             'position' => Setting::get('kepala_jabatan', 'Kepala Madrasah'),
             'message'  => Setting::get('kepala_pesan', 'Selamat kepada seluruh siswa yang telah dinyatakan lulus.'),
+            'photo'    => Setting::get('kepala_foto', 'assets/kepalamadrasah.png'),
         ];
 
         return view('index', compact(

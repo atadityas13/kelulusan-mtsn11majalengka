@@ -1003,7 +1003,7 @@
                     </div>
                     <div class="card-body">
                         @if($activeYear)
-                            <form action="{{ route('admin.settings.save') }}" method="POST">
+                            <form action="{{ route('admin.settings.save') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="academic_year_id" value="{{ $activeYear->id }}">
 
@@ -1028,6 +1028,18 @@
 
                                 <hr style="border:none; border-top:1px solid var(--border); margin: 20px 0;">
                                 <p style="font-size:0.8em; color:var(--text-muted); margin-bottom:16px;">Perubahan pada Kepala Madrasah akan langsung tampil di halaman depan setelah disimpan.</p>
+
+                                 <div class="form-group-db" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                                     <div style="flex-shrink: 0; text-align: center;">
+                                         <label style="display: block; margin-bottom: 5px; font-size: 0.85em; color: var(--text-muted);">Foto Saat Ini</label>
+                                         <img src="{{ asset($settings['kepala_foto']) }}" alt="Foto Kepala" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">
+                                     </div>
+                                     <div style="flex-grow: 1;">
+                                         <label for="kepala_foto"><i class="fa-solid fa-image" style="margin-right:6px; color:var(--primary);"></i> Unggah Foto Kepala Madrasah</label>
+                                         <input type="file" id="kepala_foto" name="kepala_foto" class="form-control" accept="image/*">
+                                         <small style="color:var(--text-muted); font-size:0.75em; display:block; margin-top:5px;">Format yang diperbolehkan: JPG, JPEG, PNG. Ukuran maks 2MB.</small>
+                                     </div>
+                                 </div>
 
                                 <div class="form-group-db">
                                     <label for="kepala_nama"><i class="fa-solid fa-user-tie" style="margin-right:6px; color:var(--primary);"></i> Nama Kepala Madrasah</label>

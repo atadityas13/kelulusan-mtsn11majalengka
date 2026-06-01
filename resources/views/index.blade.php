@@ -156,7 +156,7 @@
                                 <div class="testimoni-grid">
                                     <div class="testimoni-item">
                                         <div class="head-teacher-photo">
-                                            <img src="{{ asset('assets/kepalamadrasah.png') }}" alt="{{ $kepalaMadrasahMessage['name'] }}" class="photo">
+                                            <img src="{{ asset($kepalaMadrasahMessage['photo']) }}" alt="{{ $kepalaMadrasahMessage['name'] }}" class="photo">
                                         </div>
                                         <p>"{{ $kepalaMadrasahMessage['message'] }}"</p>
                                         <span class="author">- {{ $kepalaMadrasahMessage['name'] }} <br>({{ $kepalaMadrasahMessage['position'] }})</span>
@@ -239,7 +239,7 @@
                                             <p class="student-info"><span class="info-label">Jenis Kelamin</span> <span class="info-value"><strong>: {{ $foundStudent->jenis_kelamin }}</strong></span></p>
                                             <p class="student-info"><span class="info-label">Kelas</span> <span class="info-value"><strong>: {{ $foundStudent->kelas }}</strong></span></p>
                                             
-                                            <p class="status-text">Anda dinyatakan <strong style="color:var(--success-color);">LULUS</strong> berdasarkan Surat Keterangan Lulus nomor : {{ $foundStudent->nomor_skl }} tanggal {{ \Carbon\Carbon::parse($activeYear->target_date)->translatedFormat('d F Y') }}</p>
+                                            <p class="status-text" style="font-weight: normal;"><strong>Anda dinyatakan <span style="color:var(--success-color);">LULUS</span></strong> berdasarkan Surat Keterangan Lulus nomor : <strong>{{ $foundStudent->nomor_skl }}</strong> tanggal {{ \Carbon\Carbon::parse($activeYear->target_date)->locale('id')->translatedFormat('d F Y') }}</p>
                                             <p class="message-success">Kami bangga dengan pencapaian Anda! Teruslah belajar, raih cita-cita, dan jaga nama baik almamater.<br>Rayakan rasa syukur Anda secara positif dengan berbagi kebahagiaan mengisi kesan dan pesan di bawah!</p>
 
                                             <!-- Penanganan unduhan SKL PDF dinamis -->
@@ -267,7 +267,7 @@
                                                 <div class="testimoni-grid">
                                                     <div class="testimoni-item">
                                                         <div class="head-teacher-photo">
-                                                            <img src="{{ asset('assets/kepalamadrasah.png') }}" alt="{{ $kepalaMadrasahMessage['name'] }}" class="photo">
+                                                            <img src="{{ asset($kepalaMadrasahMessage['photo']) }}" alt="{{ $kepalaMadrasahMessage['name'] }}" class="photo">
                                                         </div>
                                                         <p>"{{ $kepalaMadrasahMessage['message'] }}"</p>
                                                         <span class="author">- {{ $kepalaMadrasahMessage['name'] }} <br>({{ $kepalaMadrasahMessage['position'] }})</span>
