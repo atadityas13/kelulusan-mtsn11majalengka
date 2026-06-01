@@ -33,9 +33,9 @@
 @endsection
 
 @section('content')
-    @if($showResult)
+    @if($foundStudent && !$batchReleaseNotYet)
     <!-- Modal Himbauan Karakter -->
-    <div class="modal-warning-overlay" id="modal-warning-overlay" style="display:none;">
+    <div class="modal-warning-overlay" id="modal-warning-overlay" style="display:flex;">
         <div class="modal-warning">
             <h2>HIMBAUAN DALAM MENYIKAPI PENGUMUMAN KELULUSAN</h2>
             <ol>
@@ -53,7 +53,7 @@
             <div class="modal-warning-checkbox-group">
                 <input type="checkbox" id="modal-warning-checkbox">
                 <label for="modal-warning-checkbox" style="user-select: none;">
-                    Saya menyatakan dengan sungguh-sungguh bahwa saya akan menaati semua himbauan, dan apabila melanggar saya siap menanggung segala konsekuensinya.
+                    Saya <b>{{ $foundStudent->nama }}</b>, menyatakan dengan sungguh-sungguh bahwa saya akan menaati semua himbauan, dan apabila melanggar saya siap menanggung segala konsekuensinya.
                 </label>
             </div>
             <button class="btn-modal-confirm" id="btn-modal-confirm" disabled>Mengerti</button>
@@ -457,46 +457,19 @@
         revealEls.forEach(el => observer.observe(el));
     });
 
-    // Kontrol Himbauan Modal yang Dipicu Setiap Kali Klik Cek Kelulusan
+    // Kontrol Himbauan Modal Pada Halaman Hasil Kelulusan
     document.addEventListener('DOMContentLoaded', function() {
         var modal = document.getElementById('modal-warning-overlay');
         var btn = document.getElementById('btn-modal-confirm');
         var checkbox = document.getElementById('modal-warning-checkbox');
-        var form = document.getElementById('graduation-form');
-        var isWarningConfirmed = false;
         
         if (modal && btn && checkbox) {
-            // Modal disembunyikan di awal
-            modal.style.display = 'none';
-
-            // Intersept pengiriman formulir setiap kali submit
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    if (!isWarningConfirmed) {
-                        e.preventDefault();
-                        // Reset checkbox dan tombol persetujuan setiap kali dibuka
-                        checkbox.checked = false;
-                        btn.disabled = true;
-                        modal.style.display = 'flex';
-                    }
-                });
-            }
-
+            btn.disabled = !checkbox.checked;
             checkbox.addEventListener('change', function() {
                 btn.disabled = !checkbox.checked;
             });
-
             btn.addEventListener('click', function() {
-                isWarningConfirmed = true;
                 modal.style.display = 'none';
-                
-                // Kirim formulir setelah siswa menyetujui himbauan
-                if (form) {
-                    form.submit();
-                }
-                
-                // Reset flag pengaman
-                isWarningConfirmed = false;
             });
         }
     });
