@@ -480,73 +480,86 @@
         // Setup Tanda Tangan Canvas
         var canvas = document.getElementById('signature-pad');
         var btnClear = document.getElementById('btn-clear-signature');
-        var isDrawing = false;
-        var hasSigned = false;
-
+        
         if (canvas) {
             var ctx = canvas.getContext('2d');
+            var isDrawing = false;
+            var hasSigned = false;
 
-            function resizeCanvas() {
-                var w = canvas.clientWidth;
-                var h = canvas.clientHeight;
-                
-                // Jika masih 0 karena durasi/animasi transisi modal, gunakan fallback aman
-                if (w === 0) w = canvas.offsetWidth || 550;
-                if (h === 0) h = canvas.offsetHeight || 180;
-
-                canvas.width = w;
-                canvas.height = h;
-
-                // Tinta warna hitam sesuai permintaan user
-                ctx.strokeStyle = '#000000'; 
+            // Inisialisasi properti gambar pada konteks
+            function initContext() {
+                ctx.strokeStyle = '#000000'; // Warna hitam sesuai permintaan
                 ctx.lineWidth = 3;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
             }
 
-            // Inisialisasi awal
-            setTimeout(resizeCanvas, 350);
-            window.addEventListener('resize', resizeCanvas);
+            // Fungsi menyelaraskan resolusi pixel internal canvas dengan ukuran tampilannya di layar
+            function syncCanvasSize() {
+                var w = canvas.offsetWidth;
+                var h = canvas.offsetHeight;
+                
+                // Jika masih 0 karena transisi/animasi CSS modal, beri ukuran default yang aman
+                if (!w || w === 0) w = 550;
+                if (!h || h === 0) h = 180;
+
+                // Hanya set jika ukuran berubah untuk menghindari terhapusnya gambar saat menggambar
+                if (canvas.width !== w || canvas.height !== h) {
+                    canvas.width = w;
+                    canvas.height = h;
+                    initContext();
+                }
+            }
+
+            // Sinkronisasi awal
+            setTimeout(syncCanvasSize, 500);
+            window.addEventListener('resize', syncCanvasSize);
 
             // Bersihkan tanda tangan
-            btnClear.addEventListener('click', function() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                hasSigned = false;
-                validateAgreement();
-            });
+            if (btnClear) {
+                btnClear.addEventListener('click', function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    hasSigned = false;
+                    validateAgreement();
+                });
+            }
 
-            // Akurasi koordinat sentuhan & mouse
+            // Dapatkan koordinat gambar yang akurat (Mobile & Desktop)
             function getCoords(e) {
                 var rect = canvas.getBoundingClientRect();
                 var clientX, clientY;
-                
+
+                // Deteksi sentuhan (touch event)
                 if (e.touches && e.touches.length > 0) {
                     clientX = e.touches[0].clientX;
                     clientY = e.touches[0].clientY;
+                } else if (e.changedTouches && e.changedTouches.length > 0) {
+                    clientX = e.changedTouches[0].clientX;
+                    clientY = e.changedTouches[0].clientY;
                 } else {
+                    // Deteksi mouse (mouse event)
                     clientX = e.clientX;
                     clientY = e.clientY;
                 }
-                
+
                 return {
                     x: clientX - rect.left,
                     y: clientY - rect.top
                 };
             }
 
+            // Fungsi memulai gambar
             function startDrawing(e) {
-                // Paksa resize jika saat disentuh pertama kali ukuran pixel internal masih 0
-                if (canvas.width === 0 || canvas.height === 0) {
-                    resizeCanvas();
-                }
+                syncCanvasSize(); // Pastikan ukuran sinkron sebelum menggambar
                 isDrawing = true;
                 var coords = getCoords(e);
                 ctx.beginPath();
                 ctx.moveTo(coords.x, coords.y);
-                // Mencegah scroll layar HP saat sedang menggambar tanda tangan
+                
                 if (e.cancelable) e.preventDefault();
             }
 
+            // Fungsi menggambar goresan
             function draw(e) {
                 if (!isDrawing) return;
                 var coords = getCoords(e);
@@ -554,6 +567,7 @@
                 ctx.stroke();
                 hasSigned = true;
                 validateAgreement();
+                
                 if (e.cancelable) e.preventDefault();
             }
 
@@ -561,13 +575,13 @@
                 isDrawing = false;
             }
 
-            // Mouse Event Listeners
+            // Mouse Events
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseleave', stopDrawing);
 
-            // Touch Event Listeners (HP & Tablet)
+            // Touch Events (Smartphone & Tablet)
             canvas.addEventListener('touchstart', startDrawing, { passive: false });
             canvas.addEventListener('touchmove', draw, { passive: false });
             canvas.addEventListener('touchend', stopDrawing);
