@@ -234,13 +234,12 @@
                                             <h2 class="status-lulus">Selamat!<br> {{ $foundStudent->nama }}</h2>
                                             
                                             <p class="student-info"><span class="info-label">Nomor Peserta</span> <span class="info-value"><strong>: {{ $foundStudent->nomor_peserta }}</strong></span></p>
-                                            <p class="student-info"><span class="info-label">Nomor SKL</span> <span class="info-value"><strong>: {{ $foundStudent->nomor_skl }}</strong></span></p>
                                             <p class="student-info"><span class="info-label">NISN</span> <span class="info-value"><strong>: {{ $foundStudent->nisn }}</strong></span></p>
                                             <p class="student-info"><span class="info-label">TTL</span> <span class="info-value"><strong>: {{ $foundStudent->tempat_lahir }}, {{ $foundStudent->tanggal_lahir->format('d-m-Y') }}</strong></span></p>
                                             <p class="student-info"><span class="info-label">Jenis Kelamin</span> <span class="info-value"><strong>: {{ $foundStudent->jenis_kelamin }}</strong></span></p>
                                             <p class="student-info"><span class="info-label">Kelas</span> <span class="info-value"><strong>: {{ $foundStudent->kelas }}</strong></span></p>
                                             
-                                            <p class="status-text">Anda dinyatakan <strong style="color:var(--success-color);">LULUS</strong> dari MTsN 11 Majalengka.</p>
+                                            <p class="status-text">Anda dinyatakan <strong style="color:var(--success-color);">LULUS</strong> berdasarkan Surat Keterangan Lulus nomor : {{ $foundStudent->nomor_skl }} tanggal {{ \Carbon\Carbon::parse($activeYear->target_date)->translatedFormat('d F Y') }}</p>
                                             <p class="message-success">Kami bangga dengan pencapaian Anda! Teruslah belajar, raih cita-cita, dan jaga nama baik almamater.<br>Rayakan rasa syukur Anda secara positif dengan berbagi kebahagiaan mengisi kesan dan pesan di bawah!</p>
 
                                             <!-- Penanganan unduhan SKL PDF dinamis -->
