@@ -699,15 +699,33 @@ class AdminController extends Controller
 
     public function importPhotos(Request $request)
     {
+        if (!class_exists('ZipArchive')) {
+            return back()->with('error', 'Gagal memproses import foto: Ekstensi PHP "Zip" (ZipArchive) tidak diaktifkan di server Anda. Silakan hubungi penyedia hosting Anda untuk mengaktifkannya.');
+        }
+
         $request->validate([
             'photos_zip' => 'required|file|mimes:zip',
             'academic_year_id' => 'required|exists:academic_years,id'
         ]);
 
         try {
+            $academicYearId = $request->input('academic_year_id');
             $result = $this->processPhotosZip($request->file('photos_zip'));
-            
-            return back()->with('success', "Import foto selesai. {$result['count']} foto berhasil diimpor. {$result['skipped']} file dilewati (format tidak valid atau bukan gambar).");
+
+            $updated = 0;
+            if (!empty($result['map'])) {
+                foreach ($result['map'] as $nisn => $path) {
+                    $student = Student::where('academic_year_id', $academicYearId)
+                        ->where('nisn', $nisn)
+                        ->first();
+                    if ($student) {
+                        $student->update(['foto' => $path]);
+                        $updated++;
+                    }
+                }
+            }
+
+            return back()->with('success', "Import foto selesai. {$result['count']} file foto berhasil diekstrak. {$updated} data foto siswa berhasil diperbarui di database. {$result['skipped']} file dilewati.");
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memproses import foto: ' . $e->getMessage());
         }
@@ -720,8 +738,8 @@ class AdminController extends Controller
             'count' => 0,
             'skipped' => 0
         ];
-        
-        $uploadDir = storage_path('uploads/foto_siswa');
+
+        $uploadDir = storage_path('app/public/uploads/foto_siswa');
 
         // Buat direktori jika belum ada
         if (!is_dir($uploadDir)) {
@@ -731,7 +749,8 @@ class AdminController extends Controller
         $zip = new ZipArchive();
         if ($zip->open($zipFile->getRealPath()) === true) {
             for ($i = 0; $i < $zip->numFiles; $i++) {
-                $filename = $zip->getNameIndex($i);
+                $originalName = $zip->getNameIndex($i);
+                $filename = $originalName;
 
                 // Skip folder entries dan file di subfolder
                 if (strpos($filename, '/') !== false && substr($filename, -1) !== '/') {
@@ -754,30 +773,26 @@ class AdminController extends Controller
                 // Extract filename without extension (should be NISN)
                 $nisn = pathinfo($filename, PATHINFO_FILENAME);
 
-                // Read file content
-                $fileContent = $zip->getFromName($filename);
+                // Read file content menggunakan original name lengkap dari zip
+                $fileContent = $zip->getFromName($originalName);
                 if ($fileContent === false) {
                     $result['skipped']++;
                     continue;
                 }
 
-                // Validate image
-                $tempPath = tempnam(sys_get_temp_dir(), 'photo');
-                file_put_contents($tempPath, $fileContent);
+                // Tulis berkas langsung ke tujuan akhir
+                $storagePath = "{$uploadDir}/{$nisn}.{$ext}";
+                file_put_contents($storagePath, $fileContent);
 
-                if (getimagesize($tempPath) === false) {
-                    unlink($tempPath);
+                // Validasi gambar langsung di tempat tujuan
+                if (getimagesize($storagePath) === false) {
+                    @unlink($storagePath);
                     $result['skipped']++;
-                    continue; // Not a valid image
+                    continue;
                 }
 
-                // Save dengan nama NISN.ext
-                $storagePath = "{$uploadDir}/{$nisn}.{$ext}";
-                copy($tempPath, $storagePath);
-                unlink($tempPath);
-
-                // Map NISN to storage path (relative to public)
-                $result['map'][$nisn] = "/uploads/foto_siswa/{$nisn}.{$ext}";
+                // Map NISN to public storage path (agar sama dengan format Laravel store)
+                $result['map'][$nisn] = "uploads/foto_siswa/{$nisn}.{$ext}";
                 $result['count']++;
             }
 
