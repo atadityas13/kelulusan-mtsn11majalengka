@@ -919,7 +919,7 @@ class AdminController extends Controller
     {
         $header = trim($header);
         $header = strtolower($header);
-        $header = preg_replace('/[\s\/\\\-&\.\'"\(\):]+/', '_', $header);
+        $header = preg_replace('/[\s\/\\&\.\'"\(\):-]+/', '_', $header);
         $header = preg_replace('/[^a-z0-9_]+/', '', $header);
         $header = preg_replace('/_+/', '_', $header);
         return trim($header, '_');
