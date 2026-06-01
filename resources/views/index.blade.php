@@ -244,24 +244,32 @@
                                                 
                                                 @if($foundStudent->foto)
                                                     <div class="student-photo-container" style="position: relative; width: 120px; height: 160px; margin: 15px auto 10px auto; flex-shrink: 0; border: 4px solid #fff; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.12); background-color: #f8fafc; overflow: visible;">
-                                                        <!-- Topi Toga Overlay SVG -->
-                                                        <div class="toga-cap" style="position: absolute; top: -24px; left: 50%; transform: translateX(-50%) rotate(-6deg); width: 85px; height: auto; z-index: 10; pointer-events: none; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
-                                                            <svg viewBox="0 0 512 512" style="width: 100%; height: auto; display: block;">
-                                                                <!-- Cap Skull -->
-                                                                <path d="M140,180 c0,0 20,80 116,80 s116,-80 116,-80 v50 c0,40 -40,70 -116,70 s-116,-30 -116,-70 z" fill="#1e293b" />
-                                                                <path d="M150,225 c0,0 30,35 106,35 s106,-35 106,-35 v10 c0,25 -30,45 -106,45 s-106,-20 -106,-45 z" fill="#0f172a" />
-                                                                <!-- Cap Diamond/Board -->
-                                                                <polygon points="256,60 480,140 256,220 32,140" fill="#2d3748" stroke="#1a202c" stroke-width="4" />
-                                                                <polygon points="256,75 440,140 256,205 72,140" fill="#1a202c" />
-                                                                <!-- Button on Top -->
-                                                                <ellipse cx="256" cy="140" rx="12" ry="7" fill="#4a5568" />
-                                                                <!-- Tassel / Tali Toga -->
-                                                                <path d="M256,140 C280,145 375,180 375,220" fill="none" stroke="#ecc94b" stroke-width="5" stroke-linecap="round" />
-                                                                <!-- Tassel Brush -->
-                                                                <polygon points="370,220 380,220 385,260 365,260" fill="#ecc94b" />
-                                                                <rect x="368" y="217" width="14" height="6" rx="2" fill="#d69e2e" />
-                                                            </svg>
-                                                        </div>
+                                                         <!-- Topi Toga Overlay SVG -->
+                                                         <div class="toga-cap" style="position: absolute; top: -38px; left: 50%; transform: translateX(-50%) rotate(-5deg); width: 100px; height: auto; z-index: 10; pointer-events: none; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.35));">
+                                                             <svg viewBox="0 0 512 512" style="width: 100%; height: auto; display: block;">
+                                                                 <!-- Cap Diamond top perspective -->
+                                                                 <polygon points="256,40 500,130 256,220 12,130" fill="#1e293b" stroke="#0f172a" stroke-width="5" />
+                                                                 <polygon points="256,55 470,130 256,205 42,130" fill="#334155" />
+                                                                 <polygon points="256,55 256,205 42,130" fill="#0f172a" opacity="0.2" /> <!-- Shading -->
+                                                                 
+                                                                 <!-- Cap Skull Base -->
+                                                                 <path d="M135,165 c0,0 15,85 121,85 s121,-85 121,-85 v30 c0,45 -35,75 -121,75 s-121,-30 -121,-75 z" fill="#1e293b" stroke="#0f172a" stroke-width="4" />
+                                                                 
+                                                                 <!-- Button on Top -->
+                                                                 <ellipse cx="256" cy="130" rx="14" ry="8" fill="#e2e8f0" stroke="#475569" stroke-width="2" />
+                                                                 <ellipse cx="256" cy="128" rx="10" ry="5" fill="#f8fafc" />
+                                                                 
+                                                                 <!-- Golden Tassel / Tali Toga -->
+                                                                 <path d="M256,130 C290,135 390,175 390,225" fill="none" stroke="#fbbf24" stroke-width="6" stroke-linecap="round" />
+                                                                 
+                                                                 <!-- Golden Tassel Band -->
+                                                                 <rect x="382" y="220" width="16" height="8" rx="2" fill="#d97706" />
+                                                                 
+                                                                 <!-- Golden Tassel Brush -->
+                                                                 <polygon points="380,228 398,228 405,280 373,280" fill="#fbbf24" stroke="#d97706" stroke-width="2" />
+                                                                 <path d="M373,280 C373,280 390,290 405,280" fill="#fbbf24" />
+                                                             </svg>
+                                                         </div>
                                                         <!-- Foto Siswa -->
                                                         @php
                                                             $photoUrl = (file_exists(public_path(ltrim($foundStudent->foto, '/'))) || strpos($foundStudent->foto, 'http') === 0) ? asset(ltrim($foundStudent->foto, '/')) : asset('storage/' . ltrim($foundStudent->foto, '/'));
