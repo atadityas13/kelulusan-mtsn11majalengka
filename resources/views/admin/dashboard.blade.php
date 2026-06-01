@@ -1,3 +1,5 @@
+@extends('layouts.app')
+
 @section('title', 'Admin - Kelulusan MTsN 11 Majalengka')
 
 @section('styles')
