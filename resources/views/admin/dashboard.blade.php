@@ -1,217 +1,306 @@
-@extends('layouts.app')
-
-@section('title', 'Dasbor Administrasi - MTsN 11 Majalengka')
+@section('title', 'Admin - Kelulusan MTsN 11 Majalengka')
 
 @section('styles')
 <style>
+    * { box-sizing: border-box; }
     :root {
-        --sidebar-width: 260px;
-        --primary: #4f46e5;
-        --primary-light: #e0e7ff;
-        --secondary: #0f172a;
-        --bg-body: #f8fafc;
-        --card-bg: #ffffff;
-        --border: #e2e8f0;
-        --text-dark: #0f172a;
-        --text-muted: #64748b;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        --sidebar-w: 220px;
+        --primary: #3b4ecc;
+        --border: #dde1e7;
+        --bg: #f4f6f9;
+        --text: #1a1a2e;
+        --muted: #6b7280;
+        --success: #15803d;
+        --warning: #b45309;
+        --danger: #b91c1c;
+        --success-bg: #dcfce7;
+        --warning-bg: #fef3c7;
+        --danger-bg: #fee2e2;
+        --info-bg: #dbeafe;
+        --info: #1d4ed8;
     }
-
     body {
-        background-color: var(--bg-body) !important;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 14px;
+        background: var(--bg);
+        color: var(--text);
         display: flex;
         min-height: 100vh;
+        margin: 0;
     }
 
-    /* --- SIDEBAR --- */
+    /* SIDEBAR */
     .sidebar {
-        width: var(--sidebar-width);
-        background-color: var(--secondary);
+        width: var(--sidebar-w);
+        background: #1e2433;
         color: #fff;
         position: fixed;
-        top: 0; bottom: 0; left: 0;
+        top: 0; left: 0; bottom: 0;
         display: flex;
         flex-direction: column;
-        z-index: 1000;
-        box-shadow: 4px 0 10px rgba(0,0,0,0.05);
-        transition: var(--transition);
+        z-index: 100;
     }
-
     .sidebar-brand {
-        padding: 24px;
+        padding: 16px;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         border-bottom: 1px solid rgba(255,255,255,0.08);
     }
+    .sidebar-brand img { width: 36px; }
+    .sidebar-brand strong { font-size: 0.9em; line-height: 1.3; display: block; }
+    .sidebar-brand small { font-size: 0.72em; opacity: 0.6; }
+    .sidebar-menu { list-style: none; margin: 0; padding: 10px 0; flex: 1; overflow-y: auto; }
+    .sidebar-menu-item a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        color: rgba(255,255,255,0.65);
+        text-decoration: none;
+        font-size: 0.88em;
+        border-left: 3px solid transparent;
+    }
+    .sidebar-menu-item a:hover { background: rgba(255,255,255,0.04); color: #fff; }
+    .sidebar-menu-item.active a { background: rgba(255,255,255,0.06); color: #fff; border-left-color: var(--primary); }
+    .sidebar-menu-item a i { width: 16px; text-align: center; font-size: 0.95em; }
+    .sidebar-footer {
+        padding: 12px 16px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.78em;
+        color: rgba(255,255,255,0.4);
+    }
+    .sidebar-footer button {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.5);
+        cursor: pointer;
+        font-size: 1em;
+        padding: 4px 6px;
+    }
+    .sidebar-footer button:hover { color: #fff; }
 
-    .sidebar-brand img { width: 42px; height: auto; }
-    .sidebar-brand span { font-weight: 700; font-size: 1.05em; letter-spacing: 0.5px; line-height: 1.2; }
+    /* MAIN */
+    .main-panel {
+        margin-left: var(--sidebar-w);
+        flex: 1;
+        padding: 24px;
+        max-width: calc(100% - var(--sidebar-w));
+    }
+    .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    .topbar h1 {
+        font-size: 1.15em;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0;
+    }
+    .topbar-user {
+        font-size: 0.82em;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-    .sidebar-menu { list-style: none; padding: 20px 0; margin: 0; flex-grow: 1; overflow-y: auto; }
-    .sidebar-menu-item a { display: flex; align-items: center; gap: 14px; padding: 14px 24px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.92em; font-weight: 500; transition: var(--transition); border-left: 4px solid transparent; }
-    .sidebar-menu-item a:hover { background-color: rgba(255,255,255,0.04); color: #fff; }
-    .sidebar-menu-item.active a { background-color: rgba(255,255,255,0.06); color: #fff; border-left-color: var(--primary); }
-    .sidebar-menu-item a i { font-size: 1.15em; width: 20px; text-align: center; }
+    /* ALERTS */
+    .alert {
+        padding: 10px 14px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid;
+    }
+    .alert-success { background: var(--success-bg); color: var(--success); border-color: #bbf7d0; }
+    .alert-error { background: var(--danger-bg); color: var(--danger); border-color: #fca5a5; }
 
-    .sidebar-footer { padding: 20px 24px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.85em; color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: space-between; }
-    .sidebar-footer button { background: none; border: none; color: var(--danger); font-size: 1.2em; cursor: pointer; transition: var(--transition); }
-    .sidebar-footer button:hover { transform: scale(1.15); }
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .stat-info h3 { font-size: 0.75em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin: 0 0 6px 0; }
+    .stat-info p { font-size: 1.6em; font-weight: 700; margin: 0; color: var(--text); }
+    .stat-icon { width: 38px; height: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1em; }
+    .stat-icon-blue { background: #eff6ff; color: #2563eb; }
+    .stat-icon-green { background: #f0fdf4; color: #16a34a; }
+    .stat-icon-orange { background: #fffbeb; color: #d97706; }
+    .stat-icon-red { background: #fef2f2; color: #dc2626; }
 
-    /* --- MAIN CONTENT AREA --- */
-    .main-panel { margin-left: var(--sidebar-width); flex-grow: 1; padding: 30px; box-sizing: border-box; max-width: calc(100% - var(--sidebar-width)); }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
-    .header h1 { font-size: 1.7em; margin: 0; font-weight: 700; color: var(--text-dark); letter-spacing: -0.5px; }
+    /* CARDS */
+    .card { background: #fff; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
+    .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .card-header h2 { margin: 0; font-size: 0.95em; font-weight: 600; color: var(--text); }
+    .card-body { padding: 18px; }
 
-    .user-widget { display: flex; align-items: center; gap: 12px; background: #fff; padding: 8px 16px; border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); font-size: 0.9em; font-weight: 500; }
-    .user-widget i { color: var(--primary); font-size: 1.1em; }
-
-    /* Alerts */
-    .alert { padding: 16px 20px; border-radius: 12px; font-size: 0.92em; font-weight: 500; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; }
-    .alert-success { background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--success); }
-    .alert-error { background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger); }
-
-    /* --- STATS CARDS --- */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-    .stat-card { background-color: var(--card-bg); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; transition: var(--transition); }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
-    .stat-info h3 { margin: 0; color: var(--text-muted); font-size: 0.88em; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-info p { margin: 8px 0 0 0; font-size: 1.8em; font-weight: 700; color: var(--text-dark); line-height: 1; }
-    .stat-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4em; }
-    .stat-icon-blue { background-color: #eff6ff; color: #3b82f6; }
-    .stat-icon-green { background-color: #ecfdf5; color: #10b981; }
-    .stat-icon-orange { background-color: #fffbeb; color: #f59e0b; }
-    .stat-icon-red { background-color: #fef2f2; color: #ef4444; }
-
-    /* --- CARDS & PANELS --- */
-    .card { background-color: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 30px; overflow: hidden; }
-    .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
-    .card-header h2 { margin: 0; font-size: 1.15em; font-weight: 600; color: var(--text-dark); }
-    .card-body { padding: 24px; }
-
-    /* --- DATA TABLES --- */
+    /* TABLES */
     .table-responsive { width: 100%; overflow-x: auto; }
-    table.data-table { width: 100%; border-collapse: collapse; font-size: 0.9em; text-align: left; }
-    table.data-table th, table.data-table td { padding: 14px 18px; border-bottom: 1px solid var(--border); }
-    table.data-table th { background-color: #f8fafc; color: var(--text-muted); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; }
-    table.data-table tbody tr:hover { background-color: #f8fafc; }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 0.87em; }
+    table.data-table th { padding: 10px 14px; background: #f9fafb; color: var(--muted); font-weight: 600; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid var(--border); text-align: left; }
+    table.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    table.data-table tbody tr:hover { background: #fafbfc; }
 
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8em; font-weight: 600; }
-    .badge-success { background-color: #d1fae5; color: #065f46; }
-    .badge-danger { background-color: #fee2e2; color: #991b1b; }
-    .badge-warning { background-color: #fef3c7; color: #92400e; }
-    .badge-info { background-color: #e0f2fe; color: #075985; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.78em; font-weight: 600; }
+    .badge-success { background: var(--success-bg); color: var(--success); }
+    .badge-danger { background: var(--danger-bg); color: var(--danger); }
+    .badge-warning { background: var(--warning-bg); color: var(--warning); }
+    .badge-info { background: var(--info-bg); color: var(--info); }
 
-    .actions-cell { display: flex; gap: 8px; }
-    .btn-icon { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); }
-    .btn-icon:hover { color: var(--primary); border-color: var(--primary); background-color: var(--primary-light); }
-    .btn-icon-danger:hover { color: var(--danger); border-color: var(--danger); background-color: #fee2e2; }
+    /* BUTTONS */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.85em;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid transparent;
+        text-decoration: none;
+        line-height: 1.4;
+    }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { background: #2f3fa5; }
+    .btn-secondary { background: #fff; border-color: var(--border); color: var(--text); }
+    .btn-secondary:hover { background: #f4f6f9; }
+    .btn-danger { background: var(--danger-bg); color: var(--danger); border-color: #fca5a5; }
+    .btn-danger:hover { background: #fecaca; }
+    .btn-sm { padding: 4px 10px; font-size: 0.8em; }
 
-    /* --- BUTTONS --- */
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-family: inherit; font-size: 0.9em; font-weight: 500; cursor: pointer; transition: var(--transition); border: 1px solid transparent; text-decoration: none; }
-    .btn-primary { background-color: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
-    .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
-    .btn-secondary { background-color: #fff; border-color: var(--border); color: var(--text-dark); }
-    .btn-secondary:hover { background-color: #f8fafc; border-color: var(--text-muted); }
-    .btn-danger { background-color: var(--danger); color: #fff; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
-    .btn-danger:hover { background-color: #dc2626; transform: translateY(-1px); }
+    .actions-cell { display: flex; gap: 6px; }
+    .btn-icon {
+        width: 28px; height: 28px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--muted);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        font-size: 0.85em;
+    }
+    .btn-icon:hover { background: #f4f6f9; color: var(--primary); border-color: var(--primary); }
+    .btn-icon-danger:hover { background: var(--danger-bg); color: var(--danger); border-color: #fca5a5; }
 
-    /* --- FORMS --- */
-    .search-form { display: flex; gap: 10px; flex-grow: 1; max-width: 400px; }
-    .form-control { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.9em; box-sizing: border-box; background-color: #fff; color: var(--text-dark); outline: none; transition: var(--transition); }
-    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12); }
-    
-    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 18px; }
-    .form-group-db { margin-bottom: 18px; text-align: left; }
-    .form-group-db label { display: block; margin-bottom: 6px; font-size: 0.88em; font-weight: 500; color: var(--text-dark); }
+    /* FORMS */
+    .search-form { display: flex; gap: 8px; flex-grow: 1; max-width: 360px; }
+    .form-control {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.87em;
+        background: #fff;
+        color: var(--text);
+        outline: none;
+        box-sizing: border-box;
+    }
+    .form-control:focus { border-color: var(--primary); }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 14px; }
+    .form-group-db { margin-bottom: 14px; }
+    .form-group-db label { display: block; margin-bottom: 5px; font-size: 0.82em; font-weight: 500; color: #333; }
 
-    /* --- MODALS --- */
-    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-    .modal-content { background: #fff; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; overflow: hidden; }
-    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    .modal-header h3 { margin: 0; font-size: 1.15em; font-weight: 600; color: var(--text-dark); }
-    .modal-close { background: none; border: none; font-size: 1.4em; color: var(--text-muted); cursor: pointer; }
-    .modal-close:hover { color: var(--danger); }
-    .modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
-    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background-color: #f8fafc; }
+    /* MODALS */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal-content { background: #fff; border-radius: 6px; width: 100%; max-width: 560px; border: 1px solid var(--border); overflow: hidden; }
+    .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-header h3 { margin: 0; font-size: 0.95em; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.2em; color: var(--muted); cursor: pointer; }
+    .modal-body { padding: 18px; max-height: 65vh; overflow-y: auto; }
+    .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; background: #f9fafb; }
 
-    /* --- RESPONSIVITAS --- */
-    @media (max-width: 992px) {
-        .sidebar { width: 70px; }
-        .sidebar-brand span, .sidebar-footer span, .sidebar-menu-item span { display: none; }
-        .sidebar-brand { padding: 15px; justify-content: center; }
-        .sidebar-menu-item a { padding: 15px; justify-content: center; border-left-width: 3px; }
-        .sidebar-footer { padding: 15px; justify-content: center; }
-        .main-panel { margin-left: 70px; max-width: calc(100% - 70px); padding: 20px; }
+    /* PAGINATION */
+    .pagination-container { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .pagination-info { font-size: 0.82em; color: var(--muted); }
+
+    @media (max-width: 900px) {
+        .sidebar { width: 60px; }
+        .sidebar-brand strong, .sidebar-brand small, .sidebar-menu-item span, .sidebar-footer span { display: none; }
+        .sidebar-brand { justify-content: center; padding: 12px; }
+        .sidebar-menu-item a { justify-content: center; padding: 12px; }
+        .sidebar-footer { justify-content: center; }
+        .main-panel { margin-left: 60px; max-width: calc(100% - 60px); }
     }
     @media (max-width: 600px) {
-        .header { flex-direction: column; align-items: flex-start; gap: 15px; }
-        .user-widget { width: 100%; justify-content: center; }
+        .topbar { flex-direction: column; align-items: flex-start; gap: 10px; }
         .card-header { flex-direction: column; align-items: stretch; }
-        .search-form { max-width: 100%; }
+        .stats-grid { grid-template-columns: 1fr 1fr; }
     }
 </style>
 @endsection
 
 @section('content')
-    <!-- SIDEBAR KIRI -->
     <aside class="sidebar">
         <div class="sidebar-brand">
             <img src="{{ asset('assets/mtsn11majalengka-logo.png') }}" alt="Logo">
-            <span>Admin Control<br><small style="font-size:0.75em; font-weight:normal; opacity:0.7;">MTsN 11 Majalengka</small></span>
+            <div>
+                <strong>MTsN 11 Majalengka</strong>
+                <small>Panel Admin</small>
+            </div>
         </div>
         <ul class="sidebar-menu">
             <li class="sidebar-menu-item {{ $activeTab === 'overview' ? 'active' : '' }}">
-                <a href="?tab=overview"><i class="fa-solid fa-chart-line"></i> <span>Ringkasan</span></a>
+                <a href="?tab=overview"><i class="fa-solid fa-gauge"></i> <span>Ringkasan</span></a>
             </li>
             <li class="sidebar-menu-item {{ $activeTab === 'students' ? 'active' : '' }}">
                 <a href="?tab=students"><i class="fa-solid fa-graduation-cap"></i> <span>Data Siswa</span></a>
             </li>
             <li class="sidebar-menu-item {{ $activeTab === 'testimonials' ? 'active' : '' }}">
-                <a href="?tab=testimonials"><i class="fa-solid fa-comments"></i> <span>Testimoni Siswa</span></a>
+                <a href="?tab=testimonials"><i class="fa-solid fa-comments"></i> <span>Testimoni</span></a>
             </li>
             <li class="sidebar-menu-item {{ $activeTab === 'teacher_messages' ? 'active' : '' }}">
-                <a href="?tab=teacher_messages"><i class="fa-solid fa-comment-medical"></i> <span>Pesan Guru</span></a>
+                <a href="?tab=teacher_messages"><i class="fa-solid fa-chalkboard-user"></i> <span>Pesan Guru</span></a>
             </li>
             <li class="sidebar-menu-item {{ $activeTab === 'history' ? 'active' : '' }}">
-                <a href="?tab=history"><i class="fa-solid fa-clock-rotate-left"></i> <span>Log Riwayat</span></a>
+                <a href="?tab=history"><i class="fa-solid fa-clock-rotate-left"></i> <span>Log</span></a>
             </li>
             <li class="sidebar-menu-item {{ $activeTab === 'settings' ? 'active' : '' }}">
-                <a href="?tab=settings"><i class="fa-solid fa-sliders"></i> <span>Pengaturan</span></a>
+                <a href="?tab=settings"><i class="fa-solid fa-gear"></i> <span>Pengaturan</span></a>
             </li>
         </ul>
         <div class="sidebar-footer">
-            <span>Versi 3.0</span>
-            <form action="{{ route('admin.logout') }}" method="POST" id="logout-form" style="margin:0;">
+            <span>v3.0</span>
+            <form action="{{ route('admin.logout') }}" method="POST" style="margin:0;">
                 @csrf
-                <button type="submit" title="Keluar" onclick="return confirm('Apakah Anda yakin ingin keluar?')"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <button type="submit" title="Keluar" onclick="return confirm('Keluar dari sistem?')"><i class="fa-solid fa-right-from-bracket"></i></button>
             </form>
         </div>
     </aside>
 
-    <!-- PANEL UTAMA -->
     <main class="main-panel">
-        <header class="header">
-            <div>
-                <h1>
-                    @if($activeTab === 'overview') Ringkasan & Statistik
-                    @elseif($activeTab === 'students') Manajemen Data Roster Siswa
-                    @elseif($activeTab === 'testimonials') Moderasi Kesan & Pesan
-                    @elseif($activeTab === 'teacher_messages') Kelola Pesan Guru
-                    @elseif($activeTab === 'history') Log Riwayat Pengecekan
-                    @elseif($activeTab === 'settings') Pengaturan Sistem
-                    @endif
-                </h1>
+        <div class="topbar">
+            <h1>
+                @if($activeTab === 'overview') Ringkasan
+                @elseif($activeTab === 'students') Data Siswa
+                @elseif($activeTab === 'testimonials') Moderasi Testimoni
+                @elseif($activeTab === 'teacher_messages') Pesan Guru
+                @elseif($activeTab === 'history') Log Pengecekan
+                @elseif($activeTab === 'settings') Pengaturan
+                @endif
+            </h1>
+            <div class="topbar-user">
+                <i class="fa-solid fa-user"></i>
+                {{ Auth::user()->name }}
             </div>
-            <div class="user-widget">
-                <i class="fa-solid fa-user-shield"></i>
-                <span>Halo, {{ Auth::user()->name }}</span>
-            </div>
-        </header>
+        </div>
 
         <!-- Notifikasi Alerts -->
         @if(session('success'))
@@ -299,21 +388,6 @@
                             @endif
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-            <!-- Card Panduan & Fitur Jangka Panjang -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>Keunggulan Sistem Kelulusan Jangka Panjang (Laravel 11)</h2>
-                </div>
-                <div class="card-body" style="font-size: 0.95em; line-height: 1.7; color: var(--text-dark);">
-                    <p>Sistem ini dirancang ulang menggunakan Laravel 11 untuk menjamin kerapian, skalabilitas, dan efisiensi pengoperasian bertahun-tahun mendatang:</p>
-                    <ul>
-                        <li><strong>Pengarsipan Multi-Tahun Ajaran</strong>: Anda tidak perlu lagi menghapus data kelulusan tahun lalu untuk mengunggah kelulusan tahun ini. Cukup buat periode <em>Tahun Ajaran</em> baru di tab <strong>Pengaturan</strong>, setel target rilis, dan import data siswa baru. Sistem menyimpan arsip historis kelulusan secara utuh.</li>
-                        <li><strong>Import Massal JSON Langsung</strong>: Proses unggah data dari cPanel atau spreadsheet yang diekspor ke JSON dapat diimport instan per Tahun Ajaran.</li>
-                        <li><strong>Keamanan Lapis Server</strong>: Proteksi data pribadi siswa diperketat dengan menghilangkan download file JSON mentah ke browser. Kueri pencarian dikunci rapat via *Prepared Statements* Eloquent.</li>
-                    </ul>
                 </div>
             </div>
 
