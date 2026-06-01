@@ -529,6 +529,7 @@ class AdminController extends Controller
         return back()->with('success', 'Nilai siswa berhasil diperbarui.');
     }
 
+    public function importStudents(Request $request)
     {
         $request->validate([
             'json_file' => 'required|file|mimes:xlsx,xls,csv,json',
