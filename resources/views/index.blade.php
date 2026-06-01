@@ -457,42 +457,49 @@
         revealEls.forEach(el => observer.observe(el));
     });
 
-    // Kontrol Himbauan Modal yang Dipicu Saat Klik Cek Kelulusan
+    // Kontrol Himbauan Modal yang Dipicu Setiap Kali Klik Cek Kelulusan
     document.addEventListener('DOMContentLoaded', function() {
         var modal = document.getElementById('modal-warning-overlay');
         var btn = document.getElementById('btn-modal-confirm');
         var checkbox = document.getElementById('modal-warning-checkbox');
         var form = document.getElementById('graduation-form');
+        var isWarningConfirmed = false;
         
         if (modal && btn && checkbox) {
-            // Modal disembunyikan di awal (default CSS display:none)
+            // Modal disembunyikan di awal
             modal.style.display = 'none';
 
-            // Intersept pengiriman formulir cek kelulusan
+            // Intersept pengiriman formulir setiap kali submit
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    // Jika belum pernah menyetujui, hentikan submit dan tampilkan modal himbauan
-                    if (localStorage.getItem('warning_accepted') !== 'true') {
+                    if (!isWarningConfirmed) {
                         e.preventDefault();
+                        // Reset checkbox dan tombol persetujuan setiap kali dibuka
+                        checkbox.checked = false;
+                        btn.disabled = true;
                         modal.style.display = 'flex';
                     }
                 });
             }
 
-            btn.disabled = !checkbox.checked;
             checkbox.addEventListener('change', function() {
                 btn.disabled = !checkbox.checked;
             });
+
             btn.addEventListener('click', function() {
+                isWarningConfirmed = true;
                 modal.style.display = 'none';
-                localStorage.setItem('warning_accepted', 'true');
                 
                 // Kirim formulir setelah siswa menyetujui himbauan
                 if (form) {
                     form.submit();
                 }
+                
+                // Reset flag pengaman
+                isWarningConfirmed = false;
             });
         }
+    });
 
         // Modal Cek Nomor Peserta
         var btnNopes = document.getElementById('btn-cek-nopes');
