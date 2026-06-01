@@ -628,7 +628,6 @@
                 }
             });
         }
-    });
 
         // Modal Cek Nomor Peserta
         var btnNopes = document.getElementById('btn-cek-nopes');
