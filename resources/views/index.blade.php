@@ -245,29 +245,29 @@
                                                 @if($foundStudent->foto)
                                                     <div class="student-photo-container" style="position: relative; width: 120px; height: 160px; margin: 15px auto 10px auto; flex-shrink: 0; border: 4px solid #fff; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.12); background-color: #f8fafc; overflow: visible;">
                                                          <!-- Topi Toga Overlay SVG -->
-                                                         <div class="toga-cap" style="position: absolute; top: -38px; left: 50%; transform: translateX(-50%) rotate(-5deg); width: 100px; height: auto; z-index: 10; pointer-events: none; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.35));">
-                                                             <svg viewBox="0 0 512 512" style="width: 100%; height: auto; display: block;">
+                                                         <div class="toga-cap" style="position: absolute; top: -52px; left: 50%; transform: translateX(-50%) rotate(-5deg); width: 110px; height: auto; z-index: 10; pointer-events: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.4));">
+                                                             <svg viewBox="0 0 512 360" style="width: 100%; height: auto; display: block;">
                                                                  <!-- Cap Diamond top perspective -->
-                                                                 <polygon points="256,40 500,130 256,220 12,130" fill="#1e293b" stroke="#0f172a" stroke-width="5" />
-                                                                 <polygon points="256,55 470,130 256,205 42,130" fill="#334155" />
-                                                                 <polygon points="256,55 256,205 42,130" fill="#0f172a" opacity="0.2" /> <!-- Shading -->
+                                                                 <polygon points="256,20 500,110 256,200 12,110" fill="#1e293b" stroke="#0f172a" stroke-width="6" />
+                                                                 <polygon points="256,35 470,110 256,185 42,110" fill="#334155" />
+                                                                 <polygon points="256,35 256,185 42,110" fill="#0f172a" opacity="0.25" /> <!-- Shading -->
                                                                  
-                                                                 <!-- Cap Skull Base -->
-                                                                 <path d="M135,165 c0,0 15,85 121,85 s121,-85 121,-85 v30 c0,45 -35,75 -121,75 s-121,-30 -121,-75 z" fill="#1e293b" stroke="#0f172a" stroke-width="4" />
+                                                                 <!-- Flat Cap base band (just a small band underneath, not a deep skull cup) -->
+                                                                 <path d="M165,135 v25 c0,15 35,28 91,28 s91,-13 91,-28 v-25" fill="#1e293b" stroke="#0f172a" stroke-width="4" />
                                                                  
                                                                  <!-- Button on Top -->
-                                                                 <ellipse cx="256" cy="130" rx="14" ry="8" fill="#e2e8f0" stroke="#475569" stroke-width="2" />
-                                                                 <ellipse cx="256" cy="128" rx="10" ry="5" fill="#f8fafc" />
+                                                                 <ellipse cx="256" cy="110" rx="14" ry="8" fill="#e2e8f0" stroke="#475569" stroke-width="2" />
+                                                                 <ellipse cx="256" cy="108" rx="10" ry="5" fill="#f8fafc" />
                                                                  
                                                                  <!-- Golden Tassel / Tali Toga -->
-                                                                 <path d="M256,130 C290,135 390,175 390,225" fill="none" stroke="#fbbf24" stroke-width="6" stroke-linecap="round" />
+                                                                 <path d="M256,110 C290,115 390,155 390,205" fill="none" stroke="#fbbf24" stroke-width="6" stroke-linecap="round" />
                                                                  
                                                                  <!-- Golden Tassel Band -->
-                                                                 <rect x="382" y="220" width="16" height="8" rx="2" fill="#d97706" />
+                                                                 <rect x="382" y="200" width="16" height="8" rx="2" fill="#d97706" />
                                                                  
                                                                  <!-- Golden Tassel Brush -->
-                                                                 <polygon points="380,228 398,228 405,280 373,280" fill="#fbbf24" stroke="#d97706" stroke-width="2" />
-                                                                 <path d="M373,280 C373,280 390,290 405,280" fill="#fbbf24" />
+                                                                 <polygon points="380,208 398,208 405,255 373,255" fill="#fbbf24" stroke="#d97706" stroke-width="2" />
+                                                                 <path d="M373,255 C373,255 390,265 405,255" fill="#fbbf24" />
                                                              </svg>
                                                          </div>
                                                         <!-- Foto Siswa -->
