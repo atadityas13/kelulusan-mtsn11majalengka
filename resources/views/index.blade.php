@@ -33,8 +33,9 @@
 @endsection
 
 @section('content')
+    @if($showResult)
     <!-- Modal Himbauan Karakter -->
-    <div class="modal-warning-overlay" id="modal-warning-overlay">
+    <div class="modal-warning-overlay" id="modal-warning-overlay" style="display:none;">
         <div class="modal-warning">
             <h2>HIMBAUAN DALAM MENYIKAPI PENGUMUMAN KELULUSAN</h2>
             <ol>
@@ -59,6 +60,7 @@
             <button class="btn-modal-confirm" id="btn-modal-confirm" disabled>Mengerti</button>
         </div>
     </div>
+    @endif
 
     <!-- Modal Cek Nomor Peserta -->
     <div class="modal-nopes-overlay" id="modal-nopes-overlay" style="display:none;">
@@ -456,19 +458,27 @@
         revealEls.forEach(el => observer.observe(el));
     });
 
-    // Kontrol Himbauan Modal
+    // Kontrol Himbauan Modal dengan Persistence LocalStorage
     document.addEventListener('DOMContentLoaded', function() {
         var modal = document.getElementById('modal-warning-overlay');
         var btn = document.getElementById('btn-modal-confirm');
         var checkbox = document.getElementById('modal-warning-checkbox');
         
         if (modal && btn && checkbox) {
+            // Tampilkan modal hanya jika belum pernah menyetujui sebelumnya
+            if (localStorage.getItem('warning_accepted') === 'true') {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'flex';
+            }
+
             btn.disabled = !checkbox.checked;
             checkbox.addEventListener('change', function() {
                 btn.disabled = !checkbox.checked;
             });
             btn.addEventListener('click', function() {
                 modal.style.display = 'none';
+                localStorage.setItem('warning_accepted', 'true');
             });
         }
 
