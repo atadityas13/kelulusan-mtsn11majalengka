@@ -1,0 +1,1446 @@
+/* Variables */
+:root {
+    --primary-color: #0056b3; /* Darker blue for headings */
+    --secondary-color: #007bff; /* Bright blue */
+    --accent-color: #28a745; /* Green for success/highlights */
+    --danger-color: #dc3545; /* Red for errors/danger */
+    --success-color: #28a745; /* Specific success green */
+    --text-color: #333;
+    --light-text-color: #666;
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --form-border: #ced4da;
+    --focus-border: #80bdff;
+    --btn-bg: #007bff;
+    --btn-hover-bg: #0056b3;
+    --btn-text: #ffffff;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.12);
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    pointer-events: none; /* Allows clicks to pass through */
+    display: none; /* Hidden by default, shown by JS */
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.header {
+    background: linear-gradient(120deg, #0078d4, #00c6fb, #0056b3, #00a2ed);
+    background-size: 400% 400%;
+    animation: headerGradientMove 12s ease-in-out infinite;
+    color: var(--btn-text);
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px var(--shadow-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes headerGradientMove {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    transform: rotate(25deg);
+    opacity: 0.8;
+}
+
+.header h1 {
+    font-family: 'Merriweather', serif;
+    font-size: 2.8em;
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 3px var(--shadow-medium);
+    position: relative;
+    z-index: 1;
+}
+
+.header .tagline {
+    font-size: 1.2em;
+    opacity: 0.9;
+    margin-top: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* MODIFICATION START: Logo Styles */
+.logo {
+    width: 100px; /* Kept original width */
+    height: 100px; /* Kept original height */
+    margin-bottom: 15px;
+    /* REMOVED: border-radius: 50%; */
+    /* REMOVED: background-color: rgba(255, 255, 255, 0.9); */
+    /* REMOVED: padding: 5px; */
+    /* REMOVED: box-shadow: 0 0 15px rgba(0,0,0,0.2); */
+    animation: logoPulse 2.5s infinite alternate;
+    object-fit: contain; /* Ensure the image fits without cropping */
+}
+
+/* Logo Pulse Animation */
+@keyframes logoPulse {
+    0% { transform: scale(1);}
+    100% { transform: scale(1.08);}
+}
+
+/* REMOVED: @keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+} */
+/* MODIFICATION END: Logo Styles */
+
+.main-content {
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 1200px; /* Sesuaikan lebar maksimum sesuai kebutuhan */
+    flex-grow: 1; /* Allows main content to grow and push footer down */
+}
+
+.content-wrapper {
+    display: flex;
+    gap: 30px; /* Jarak antara kolom */
+    flex-wrap: wrap; /* Agar kolom bisa turun ke baris baru di layar kecil */
+    align-items: flex-start; /* Agar kolom tidak meregang penuh tinggi yang sama */
+}
+
+.main-column {
+    flex: 2; /* Kolom utama mengambil 2 bagian dari total 3 (misal: 66%) */
+    min-width: 400px; /* Lebar minimum agar tidak terlalu sempit */
+}
+
+.sidebar-column {
+    flex: 1; /* Kolom sidebar mengambil 1 bagian dari total 3 (misal: 33%) */
+    min-width: 300px; /* Lebar minimum agar tidak terlalu sempit */
+    display: flex; /* Untuk menumpuk item di sidebar */
+    flex-direction: column;
+    gap: 30px; /* Jarak antar section di sidebar */
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px var(--shadow-medium);
+    border: 1px solid var(--border-color);
+    padding: 30px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: cardFadeIn 0.8s cubic-bezier(.4,1.5,.5,1) both;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 2.2em;
+    text-align: center;
+    position: relative;
+    padding-bottom: 10px;
+    font-family: 'Merriweather', serif;
+}
+
+.card h2::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 80px;
+    height: 3px;
+    background-color: var(--accent-color);
+    border-radius: 2px;
+}
+
+/* Card Fade-in and Pop Animation */
+@keyframes cardFadeIn {
+    0% { opacity: 0; transform: scale(0.97) translateY(30px);}
+    100% { opacity: 1; transform: scale(1) translateY(0);}
+}
+
+/* MODIFICATION START: Illustration Container */
+.illustration-container {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.illustration-container img {
+    max-width: 80%;
+    height: auto;
+    border-radius: 8px;
+    /* REMOVED: box-shadow: 0 5px 15px var(--shadow-light); */
+}
+/* MODIFICATION END: Illustration Container */
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--light-text-color);
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group textarea {
+    width: calc(100% - 22px); /* Account for padding and border */
+    padding: 12px;
+    border: 1px solid var(--form-border);
+    border-radius: 8px;
+    font-size: 1em;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="date"]:focus,
+.form-group textarea:focus {
+    border-color: var(--focus-border);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.btn-check, .btn-download, .btn-back, .btn-submit-testimonial {
+    display: block;
+    width: 100%;
+    padding: 15px 25px;
+    font-size: 1.1em;
+    font-weight: 600;
+    text-align: center;
+    color: var(--btn-text);
+    background-color: var(--btn-bg);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    text-decoration: none; /* For download link */
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-check:hover, .btn-download:hover, .btn-back:hover, .btn-submit-testimonial:hover {
+    background-color: var(--btn-hover-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--shadow-medium);
+}
+
+.btn-check:active, .btn-download:active, .btn-back:active, .btn-submit-testimonial:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px var(--shadow-light);
+}
+
+.btn-check:after, .btn-download:after, .btn-back:after, .btn-submit-testimonial:after {
+    content: "";
+    display: block;
+    position: absolute;
+    border-radius: 50%;
+    width: 100px; height: 100px;
+    left: 50%; top: 50%;
+    pointer-events: none;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.4s, opacity 0.8s;
+    opacity: 0;
+}
+
+.btn-check:active:after, .btn-download:active:after, .btn-back:active:after, .btn-submit-testimonial:active:after {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 1;
+    transition: 0s;
+}
+
+.btn-back {
+    background-color: #6c757d; /* Grey color for back button */
+    margin-top: 30px; /* Add some space above */
+}
+
+.btn-back:hover {
+    background-color: #5a6268;
+}
+
+.info-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: var(--light-text-color);
+}
+
+.message-danger {
+    color: var(--danger-color);
+    text-align: center;
+    margin-top: 15px;
+    font-weight: 600;
+}
+
+.message-success {
+    color: var(--success-color);
+    text-align: center;
+    margin-top: 15px;
+    font-weight: 600;
+}
+
+.message-info {
+    color: #17a2b8; /* Info blue */
+    text-align: center;
+    margin-top: 15px;
+    font-weight: 600;
+}
+
+/* Result Section Styles */
+.result-content {
+    /* Set default text-align to left for most content within,
+       then explicitly center the main status headings */
+    text-align: left; /* Mengatur default rata kiri untuk konten di dalamnya */
+    padding: 10px; /* Pertahankan padding */
+}
+
+.result-content h2 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-align: center; /* Memastikan judul status tetap rata tengah */
+}
+
+.status-lulus {
+    color: var(--success-color);
+    font-family: 'Merriweather', serif;
+}
+
+.status-tidak-lulus, .status-tidak-ditemukan {
+    color: var(--danger-color);
+    font-family: 'Merriweather', serif;
+}
+
+.student-info {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    color: #555; /* Menggunakan nilai hex yang konsisten atau var(--text-color) */
+    display: flex; /* Menggunakan flexbox untuk menyelaraskan label dan nilai */
+    align-items: baseline; /* Menyelaraskan teks pada baseline */
+    text-align: left; /* Pastikan info siswa rata kiri */
+}
+
+.student-info .info-label {
+    min-width: 180px; /* Sesuaikan lebar minimum agar semua label sejajar */
+    display: inline-block; /* Penting untuk min-width bekerja */
+    margin-right: 5px; /* Sedikit spasi antara label dan nilai */
+    font-weight: 600; /* Opsional: membuat label sedikit lebih tebal */
+    color: var(--text-color); /* Opsional: warna label agar menonjol */
+}
+
+.student-info .info-value {
+    flex-grow: 1; /* Memungkinkan info-value mengambil sisa ruang */
+}
+
+.student-info strong {
+    color: var(--text-color);
+    /* Tidak perlu flex-grow di sini karena sudah ada info-value */
+}
+
+.status-text {
+    font-size: 1.3em;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-align: left; /* Pastikan teks status rata kiri */
+}
+
+/* Pastikan pesan-pesan juga rata kiri */
+.message-success,
+.message-danger,
+.message-info {
+    text-align: left;
+}
+
+/* Button positioning */
+.btn-download {
+    display: block; /* Agar bisa di-margin auto */
+    margin: 30px auto; /* Rata tengah dan beri margin atas/bawah */
+    max-width: 90%; /* Batasi lebar agar tidak keluar box pada layar kecil */
+    box-sizing: border-box; /* Pastikan padding termasuk dalam lebar */
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* Testimonial and Teacher Message Sections */
+.testimoni-section h2, .student-testimonial-form-section h3 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-top: 40px;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    font-family: 'Merriweather', serif;
+}
+.testimoni-section h2::after, .student-testimonial-form-section h3::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -5px; /* Adjust as needed */
+    width: 60px;
+    height: 2px;
+    background-color: var(--accent-color);
+    border-radius: 1px;
+}
+
+.testimoni-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.testimoni-item {
+    background-color: var(--bg-color); /* Changed to use bg-color for consistency */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px var(--shadow-light);
+    border: 1px solid var(--border-color);
+    font-style: italic;
+    position: relative;
+    animation: cardFadeIn 0.8s cubic-bezier(.4,1.5,.5,1) both;
+}
+
+.testimoni-item p {
+    margin-bottom: 15px;
+    font-size: 0.95em;
+    color: #555;
+}
+
+.testimoni-item .author {
+    display: block;
+    text-align: right;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-style: normal;
+    font-size: 0.85em;
+    margin-top: 10px;
+}
+
+.good-form {
+    padding: 25px;
+    background-color: var(--bg-color);
+    border-radius: 10px;
+    border: 1px dashed var(--border-color);
+    margin-top: 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+.form-description {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--light-text-color);
+    font-size: 0.95em;
+}
+
+/* Sidebar Specific Styles */
+.check-history-section,
+.testimonial-display-section,
+.teacher-message-display-section {
+    margin-top: 0; /* Reset margin as it's handled by sidebar-column gap */
+}
+
+/* Ensure these h2 styles are consistent if overridden */
+.check-history-section h2,
+.testimonial-display-section h2,
+.teacher-message-display-section h2 {
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    font-size: 2.2em;
+    text-align: center;
+    position: relative;
+    padding-bottom: 10px;
+}
+.check-history-section h2::after,
+.testimonial-display-section h2::after,
+.teacher-message-display-section h2::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 80px;
+    height: 3px;
+    background-color: var(--accent-color);
+    border-radius: 2px;
+}
+
+.check-history-list,
+.testimonial-list-public,
+.teacher-message-list-public {
+    list-style: none;
+    padding: 0;
+    max-height: 300px; /* Limit height */
+    overflow-y: auto; /* Add scroll if content overflows */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    background-color: var(--bg-color); /* Use card-bg or a lighter color */
+}
+
+.check-history-item,
+.testimonial-list-public-item,
+.teacher-message-list-public-item {
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border-color);
+    font-size: 0.95em;
+}
+.check-history-item:last-child,
+.testimonial-list-public-item:last-child,
+.teacher-message-list-public-item:last-child {
+    border-bottom: none;
+}
+.check-history-item .timestamp,
+.testimonial-list-public-item .date,
+.teacher-message-list-public-item .date {
+    font-size: 0.85em;
+    color: #888;
+    display: block;
+    margin-bottom: 5px;
+}
+.check-history-item .details strong {
+    color: var(--secondary-color);
+}
+/* MODIFICATION START: Removed .result-status styles */
+/* .check-history-item .result-status {
+    font-weight: bold;
+}
+.check-history-item .result-status.Lulus {
+    color: var(--success-color);
+}
+.check-history-item .result-status.Tidak_Lulus {
+    color: var(--danger-color);
+}
+.check-history-item .result-status.Tidak_Ditemukan {
+    color: #ffc107;
+} */
+/* MODIFICATION END: Removed .result-status styles */
+
+
+.testimonial-list-public-item p,
+.teacher-message-list-public-item p {
+    margin: 0;
+    font-style: italic;
+    color: #555;
+}
+.testimonial-list-public-item .author,
+.teacher-message-list-public-item .author {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.9em;
+    text-align: right;
+    display: block;
+    margin-top: 5px;
+}
+
+
+/* Footer */
+.footer {
+    background-color: var(--primary-color);
+    color: var(--btn-text);
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    box-shadow: 0 -4px 15px var(--shadow-medium);
+    animation: fadeInFooter 1.2s;
+}
+
+@keyframes fadeInFooter {
+    from { opacity: 0; transform: translateY(40px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+.footer p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .content-wrapper {
+        flex-direction: column; /* Ubah menjadi satu kolom di layar kecil */
+        gap: 20px;
+    }
+    .main-column,
+    .sidebar-column {
+        flex: none; /* Reset flex */
+        width: 100%; /* Ambil lebar penuh */
+        min-width: unset;
+    }
+    .header h1 {
+        font-size: 2em;
+    }
+    .header .tagline {
+        font-size: 1em;
+    }
+    .logo {
+        width: 80px;
+        height: 80px;
+    }
+    .card {
+        padding: 20px;
+    }
+    .card h2 {
+        font-size: 1.8em;
+    }
+    .result-content h2 {
+        font-size: 2em;
+    }
+    .status-text {
+        font-size: 1.1em;
+    }
+    .btn-check, .btn-download, .btn-back, .btn-submit-testimonial {
+        padding: 12px 20px;
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 500px) {
+    .main-content {
+        padding: 10px;
+        margin: 10px auto;
+    }
+    .card {
+        padding: 15px;
+    }
+    .card h2 {
+        font-size: 1.6em;
+    }
+    .form-group label {
+        font-size: 0.9em;
+    }
+    .form-group input, .form-group textarea {
+        font-size: 0.9em;
+        padding: 10px;
+    }
+    .testimoni-item {
+        padding: 15px;
+    }
+}
+
+/* ====== ANIMATED & MODERN ENHANCEMENTS ====== */
+
+/* Animated Gradient Background for Header */
+.header {
+    /* ...existing code... */
+    background: linear-gradient(120deg, #0078d4, #00c6fb, #0056b3, #00a2ed);
+    background-size: 400% 400%;
+    animation: headerGradientMove 12s ease-in-out infinite;
+    /* ...existing code... */
+}
+@keyframes headerGradientMove {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+/* Logo Pulse Animation */
+.logo {
+    /* ...existing code... */
+    animation: logoPulse 2.5s infinite alternate;
+}
+@keyframes logoPulse {
+    0% { transform: scale(1);}
+    100% { transform: scale(1.08);}
+}
+
+/* Card Fade-in and Pop Animation */
+.card, .testimoni-item, .testimonial-list-public-item, .teacher-message-list-public-item {
+    /* ...existing code... */
+    animation: cardFadeIn 0.8s cubic-bezier(.4,1.5,.5,1) both;
+}
+@keyframes cardFadeIn {
+    0% { opacity: 0; transform: scale(0.97) translateY(30px);}
+    100% { opacity: 1; transform: scale(1) translateY(0);}
+}
+
+/* Button Ripple Effect */
+.btn-check, .btn-download, .btn-back, .btn-submit-testimonial {
+    /* ...existing code... */
+    position: relative;
+    overflow: hidden;
+}
+.btn-check:after, .btn-download:after, .btn-back:after, .btn-submit-testimonial:after {
+    content: "";
+    display: block;
+    position: absolute;
+    border-radius: 50%;
+    width: 100px; height: 100px;
+    left: 50%; top: 50%;
+    pointer-events: none;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.4s, opacity 0.8s;
+    opacity: 0;
+}
+.btn-check:active:after, .btn-download:active:after, .btn-back:active:after, .btn-submit-testimonial:active:after {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 1;
+    transition: 0s;
+}
+
+/* Animated Underline for Section Titles */
+.card h2, .testimoni-section h2, .teacher-message-display-section h2, .testimonial-display-section h2 {
+    /* ...existing code... */
+    position: relative;
+    overflow: visible;
+}
+.card h2::after, .testimoni-section h2::after, .teacher-message-display-section h2::after, .testimonial-display_section h2::after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%; bottom: -8px;
+    width: 80px; height: 3px;
+    background: linear-gradient(90deg, #28a745 0%, #0078d4 100%);
+    border-radius: 2px;
+    transform: translateX(-50%) scaleX(0);
+    animation: underlineGrow 1.2s cubic-bezier(.4,1.5,.5,1) forwards;
+}
+@keyframes underlineGrow {
+    to { transform: translateX(-50%) scaleX(1);}
+}
+
+/* Animated Like Button Heart */
+.like-button .fa-heart {
+    transition: color 0.2s, transform 0.2s;
+}
+.like-button.liked .fa-heart {
+    color: #e74c3c;
+    animation: heartPop 0.4s cubic-bezier(.4,1.5,.5,1);
+}
+@keyframes heartPop {
+    0% { transform: scale(1);}
+    50% { transform: scale(1.5);}
+    100% { transform: scale(1);}
+}
+
+/* Animated Comment Button */
+.comment-toggle-button {
+    /* ...existing code... */
+    animation: bounceIn 0.7s;
+}
+@keyframes bounceIn {
+    0% { transform: scale(0.7);}
+    60% { transform: scale(1.1);}
+    100% { transform: scale(1);}
+}
+
+/* Animated Confetti Canvas (if used) */
+#confetti-canvas {
+    /* ...existing code... */
+    animation: confettiAppear 1.2s;
+}
+@keyframes confettiAppear {
+    from { opacity: 0;}
+    to { opacity: 1;}
+}
+
+/* Animated Input Focus Glow */
+input[type="text"]:focus, input[type="date"]:focus, input[type="password"]:focus, textarea:focus {
+    /* ...existing code... */
+    animation: inputGlow 0.5s;
+}
+@keyframes inputGlow {
+    0% { box-shadow: 0 0 0 0px #0078d4;}
+    100% { box-shadow: 0 0 0 3px #80bdff;}
+}
+
+/* Animated List Items Slide-in */
+.testimonial-list-public-item, .teacher-message-list-public-item, .check-history-item {
+    animation: slideInList 0.7s cubic-bezier(.4,1.5,.5,1);
+}
+@keyframes slideInList {
+    0% { opacity: 0; transform: translateX(-40px);}
+    100% { opacity: 1; transform: translateX(0);}
+}
+
+/* Animated Footer Fade-in */
+.footer {
+    /* ...existing code... */
+    animation: fadeInFooter 1.2s;
+}
+@keyframes fadeInFooter {
+    from { opacity: 0; transform: translateY(40px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+/* Animated Section Divider */
+section:not(:last-child) {
+    border-bottom: 2px dashed #e0e0e0;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    position: relative;
+    overflow: visible;
+}
+section:not(:last-child)::after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%; bottom: -2px;
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, #0078d4 0%, #28a745 100%);
+    border-radius: 1px;
+    transform: translateX(-50%) scaleX(0);
+    animation: dividerGrow 1.2s cubic-bezier(.4,1.5,.5,1) forwards;
+}
+@keyframes dividerGrow {
+    to { transform: translateX(-50%) scaleX(1);}
+}
+
+/* Animated Scrollbar Thumb */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(120deg, #0078d4 0%, #28a745 100%);
+    transition: background 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(120deg, #28a745 0%, #0078d4 100%);
+}
+
+/* Animated Success/Info/Error Message Pop */
+.message-success, .message-danger, .message-info, .download-notice {
+    animation: popMessage 0.7s cubic-bezier(.4,1.5,.5,1);
+}
+@keyframes popMessage {
+    0% { opacity: 0; transform: scale(0.95);}
+    100% { opacity: 1; transform: scale(1);}
+}
+
+/* Animated Avatar/Photo Pop */
+.head-teacher-photo .photo, .avatar-circle {
+    border-radius: 50%;
+    border: 2px solid #0078d4;
+    object-fit: cover;
+    width: 70px;    /* Ubah dari 90px ke 70px agar lebih proporsional di halaman guru */
+    height: 70px;   /* Ubah dari 90px ke 70px agar lebih proporsional di halaman guru */
+    box-shadow: 0 2px 8px rgba(0,120,212,0.08);
+    animation: avatarPop 1s cubic-bezier(.4,1.5,.5,1);
+}
+@keyframes avatarPop {
+    0% { opacity: 0; transform: scale(0.7);}
+    100% { opacity: 1; transform: scale(1);}
+}
+
+/* Animated Testimonial Author Fade-in */
+.testimoni-item .author, .testimonial-list-public-item .author, .teacher-message-list-public-item .author {
+    animation: fadeInAuthor 1.2s;
+}
+@keyframes fadeInAuthor {
+    from { opacity: 0;}
+    to { opacity: 1;}
+}
+
+/* ====== ANIMASI SCROLL REVEAL UNTUK SETIAP SECTION ====== */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+    transition: opacity 0.7s cubic-bezier(.4,1.5,.5,1), transform 0.7s cubic-bezier(.4,1.5,.5,1);
+    will-change: opacity, transform;
+}
+.scroll-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* ====== CUSTOM SCROLLBAR YANG KEREN ====== */
+::-webkit-scrollbar {
+    width: 12px;
+    background: linear-gradient(120deg, #f8f9fa 60%, #e3f2fd 100%);
+    border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(120deg, #0078d4 0%, #28a745 100%);
+    border-radius: 8px;
+    min-height: 40px;
+    box-shadow: 0 2px 8px rgba(0,120,212,0.13);
+    border: 2px solid #f8f9fa;
+    transition: background 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(120deg, #28a745 0%, #007bff 100%);
+}
+::-webkit-scrollbar-corner {
+    background: #f8f9fa;
+}
+
+/* Untuk Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #28a745 #e3f2fd;
+}
+
+/* ====== ANIMASI SCROLLBAR (opsional, efek shimmer) ====== */
+::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(120deg, #00c6fb 0%, #28a745 100%);
+    box-shadow: 0 0 12px #28a74577;
+}
+
+/* Anda dapat menambahkan gaya ini ke file style.css yang sudah ada */
+
+/* Gaya tambahan untuk tampilan countdown */
+.countdown-section {
+    background-color: #f0f8ff; /* Warna latar belakang biru muda */
+    border: 1px solid #cce5ff;
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.countdown-section h2 {
+    color: #0056b3;
+    margin-bottom: 15px;
+    font-size: 1.8em;
+}
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap; /* Agar responsif di layar kecil */
+}
+.countdown-item {
+    background-color: #007bff;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    min-width: 90px;
+    font-size: 3em;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+    flex-grow: 1; /* Agar item mengisi ruang */
+    max-width: 120px; /* Batasi lebar maksimum item */
+}
+.countdown-item span {
+    display: block;
+    font-size: 0.8em; /* Reduced size for better responsiveness */
+    font-weight: normal;
+    margin-top: 5px;
+    opacity: 0.8;
+}
+.countdown-message {
+    margin-top: 20px;
+    font-size: 1.5em; /* Reduced size for better responsiveness */
+    color: #333;
+}
+
+/* Pastikan gaya ini juga ada di style.css Anda jika belum */
+.btn-download.disabled {
+    background-color: #cccccc; /* Warna abu-abu */
+    cursor: not-allowed; /* Kursor "tidak diizinkan" */
+    opacity: 0.7; /* Sedikit transparan */
+}
+/* style.css additions */
+.feedback-actions {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.like-button {
+    background-color: #f0f2f5;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.like-button:hover {
+    background-color: #e0e2e5;
+}
+
+.like-button.liked {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* --- TAMBAHKAN KODE INI KE style.css ANDA --- */
+/* Styling Dasar untuk Tombol Komentar */
+.comment-toggle-button {
+    background-color: #007bff; /* Warna biru yang menarik untuk tombol aksi */
+    color: white; /* Teks putih agar kontras */
+    padding: 8px 15px; /* Ruang di sekitar teks dan ikon */
+    border: none; /* Hapus border default */
+    border-radius: 5px; /* Sudut sedikit membulat */
+    cursor: pointer; /* Ubah kursor jadi pointer saat di-hover */
+    font-size: 0.95em; /* Ukuran font sedikit lebih besar dari like button */
+    font-weight: 500; /* Sedikit lebih tebal */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Transisi halus untuk efek */
+    display: flex; /* Mengatur ikon dan teks sejajar */
+    align-items: center; /* Pusatkan secara vertikal */
+    gap: 7px; /* Jarak antara ikon dan teks */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* Bayangan lembut untuk kedalaman */
+}
+
+/* Hover Effect untuk Tombol Komentar */
+.comment-toggle-button:hover {
+    background-color: #0056b3; /* Warna lebih gelap saat di-hover */
+    transform: translateY(-1px); /* Sedikit naik untuk efek interaktif */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25); /* Bayangan lebih dalam saat di-hover */
+}
+
+/* Active/Clicked State untuk Tombol Komentar */
+.comment-toggle-button:active {
+    background-color: #004085; /* Warna lebih gelap lagi saat ditekan */
+    transform: translateY(0); /* Kembali ke posisi semula */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Bayangan lebih kecil saat ditekan */
+}
+
+/* Styling untuk Ikon Font Awesome di dalam tombol komentar (jika digunakan) */
+.comment-toggle-button .fa-comment {
+    font-size: 1.1em; /* Ukuran ikon sedikit lebih besar dari teks untuk penekanan */
+    line-height: 1; /* Memastikan ikon sejajar vertikal dengan teks */
+}
+
+/* Opsi tambahan: styling untuk tombol komentar saat bagian komentar terbuka */
+/* Jika Anda menambahkan class 'active-comments' dengan JavaScript */
+/* .comment-toggle-button.active-comments {
+    background-color: #28a745; /* Warna hijau misalnya saat terbuka */
+/* }
+.comment-toggle-button.active-comments:hover {
+    background-color: #218838;
+} */
+/* --- AKHIR PENAMBAHAN KODE INI --- */
+
+
+.comments-section {
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.comments-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.comment-item {
+    background-color: #f9f9f9;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.85em;
+    border: 1px solid #e0e0e0;
+}
+
+.comment-author {
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 3px;
+    display: block;
+}
+
+.comment-date {
+    font-size: 0.75em;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.comment-text {
+    margin-top: 5px;
+    line-height: 1.4;
+    color: #333;
+}
+
+.comment-form {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+}
+
+.comment-form textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+    min-height: 60px;
+    margin-bottom: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9em;
+}
+
+.comment-form input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9em;
+}
+
+.comment-form button {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+}
+
+.comment-form button:hover {
+    background-color: #218838;
+}
+
+/* Icon for likes */
+.like-icon::before {
+    content: "👍"; /* Unicode thumbs up emoji */
+    margin-right: 5px;
+}
+
+/* ====== MODERN & CREATIVE ENHANCEMENTS ====== */
+
+/* Glassmorphism Card Effect */
+.card,
+.testimoni-item,
+.testimonial-list-public-item,
+.teacher-message-list-public-item {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px) saturate(120%);
+    border: 1.5px solid rgba(40,167,69,0.08);
+    box-shadow: 0 8px 32px 0 rgba(31,38,135,0.12);
+    /* ...existing code... */
+}
+
+/* Animated Gradient Border for Cards */
+.card,
+.testimoni-item,
+.testimonial-list-public-item,
+.teacher-message-list-public-item {
+    position: relative;
+    overflow: hidden;
+}
+.card::before,
+.testimoni-item::before,
+.testimonial-list-public-item::before,
+.teacher-message-list-public-item::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: 0;
+    border-radius: 14px;
+    background: linear-gradient(120deg, #28a745 0%, #00a2ed 100%);
+    opacity: 0.18;
+    pointer-events: none;
+    animation: borderGlow 3s linear infinite alternate;
+}
+@keyframes borderGlow {
+    0% { filter: blur(2px) brightness(1.1);}
+    100% { filter: blur(6px) brightness(1.3);}
+}
+.card > *, .testimoni-item > *, .testimonial-list-public-item > *, .teacher-message-list-public-item > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Neon Glow for Main Titles */
+.header h1 {
+    /* ...existing code... */
+    text-shadow: 0 0 8px #00c6fb, 0 2px 8px #28a74577, 0 0 2px #fff;
+    letter-spacing: 1.5px;
+}
+
+/* Floating Animation for Logo */
+.logo {
+    /* ...existing code... */
+    animation: logoPulse 2.5s infinite alternate, floatLogo 4s ease-in-out infinite;
+}
+@keyframes floatLogo {
+    0%,100% { transform: translateY(0);}
+    50% { transform: translateY(-12px);}
+}
+
+/* Animated Gradient Button */
+.btn-check, .btn-download, .btn-back, .btn-submit-testimonial {
+    background: linear-gradient(90deg, #007bff 0%, #28a745 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 12px rgba(0,123,255,0.08);
+    transition: background 0.4s, box-shadow 0.3s, transform 0.2s;
+}
+.btn-check:hover, .btn-download:hover, .btn-back:hover, .btn-submit-testimonial:hover {
+    background: linear-gradient(90deg, #28a745 0%, #007bff 100%);
+    box-shadow: 0 6px 24px rgba(0,123,255,0.13);
+    /* ...existing code... */
+}
+
+/* Animated Gradient for Sidebar Section Titles */
+.check-history-section h2,
+.testimonial-display-section h2,
+.teacher-message-display-section h2 {
+    background: linear-gradient(90deg, #28a745 0%, #007bff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+    letter-spacing: 1px;
+}
+
+/* Animated Pulse for Like Button */
+.like-button {
+    /* ...existing code... */
+    box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+    animation: pulseLikeBtn 2.5s infinite alternate;
+}
+@keyframes pulseLikeBtn {
+    0% { box-shadow: 0 2px 8px rgba(0,123,255,0.08);}
+    100% { box-shadow: 0 4px 16px #28a74544;}
+}
+
+/* Animated Rainbow Border for Comment Section */
+.comments-section {
+    border-top: 2.5px solid;
+    border-image: linear-gradient(90deg, #28a745, #007bff, #00c6fb, #28a745) 1;
+    animation: rainbowBorder 5s linear infinite;
+}
+@keyframes rainbowBorder {
+    0% { border-image-source: linear-gradient(90deg, #28a745, #007bff, #00c6fb, #28a745);}
+    100% { border-image-source: linear-gradient(270deg, #28a745, #007bff, #00c6fb, #28a745);}
+}
+
+/* Animated Glow for Comment Button */
+.comment-toggle-button {
+    /* ...existing code... */
+    box-shadow: 0 2px 8px #007bff33, 0 0 0 0 #28a74555;
+    animation: glowCommentBtn 2.5s infinite alternate;
+}
+@keyframes glowCommentBtn {
+    0% { box-shadow: 0 2px 8px #007bff33, 0 0 0 0 #28a74555;}
+    100% { box-shadow: 0 4px 16px #28a74555, 0 0 8px 2px #007bff33;}
+}
+
+/* Animated Gradient for Footer */
+.footer {
+    background: linear-gradient(90deg, #0056b3 0%, #28a745 100%);
+    color: #fff;
+    /* ...existing code... */
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
+/* Floating Confetti Animation for Body */
+body::after {
+    content: '';
+    pointer-events: none;
+    position: fixed;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    z-index: 0;
+    background: url('https://svgshare.com/i/13kC.svg') repeat;
+    opacity: 0.07;
+    animation: confettiBG 30s linear infinite;
+}
+@keyframes confettiBG {
+    0% { background-position: 0 0;}
+    100% { background-position: 100vw 100vh;}
+}
+
+/* Subtle Parallax Effect for Main Content */
+.main-content {
+    /* ...existing code... */
+    background: linear-gradient(120deg, #f8f9fa 80%, #e3f2fd 100%);
+    position: relative;
+    z-index: 1;
+}
+
+/* Animated Shadow for Cards on Hover */
+.card:hover, .testimoni-item:hover, .testimonial-list-public-item:hover, .teacher-message-list-public-item:hover {
+    box-shadow: 0 16px 40px 0 #28a74533, 0 2px 8px #007bff22;
+    transform: translateY(-8px) scale(1.03);
+    transition: box-shadow 0.3s, transform 0.2s;
+}
+
+/* Animated Scrollbar Thumb (more vibrant) */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(120deg, #28a745 0%, #007bff 100%);
+    border-radius: 8px;
+    min-height: 40px;
+    box-shadow: 0 2px 8px #28a74533;
+    border: 2px solid #f8f9fa;
+    transition: background 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(120deg, #007bff 0%, #28a745 100%);
+}
+
+/* Animated Floating Bubbles Background */
+body::before {
+    content: '';
+    position: fixed;
+    z-index: 0;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    background: radial-gradient(circle at 20% 30%, #28a74533 0 10%, transparent 60%),
+                radial-gradient(circle at 80% 70%, #007bff33 0 12%, transparent 60%),
+                radial-gradient(circle at 60% 20%, #00c6fb33 0 8%, transparent 60%);
+    animation: bgBubblesMove 18s linear infinite alternate;
+    opacity: 0.35;
+}
+@keyframes bgBubblesMove {
+    0% { background-position: 20% 30%, 80% 70%, 60% 20%; }
+    100% { background-position: 30% 40%, 70% 60%, 55% 25%; }
+}
+
+/* Card Pop-in Animation with Rotation */
+.card, .testimoni-item, .testimonial-list-public-item, .teacher-message-list-public-item {
+    /* ...existing code... */
+    animation: cardPopIn 0.9s cubic-bezier(.4,1.5,.5,1) both;
+}
+@keyframes cardPopIn {
+    0% { opacity: 0; transform: scale(0.92) rotateZ(-2deg) translateY(40px);}
+    60% { opacity: 1; transform: scale(1.03) rotateZ(1deg) translateY(-8px);}
+    100% { opacity: 1; transform: scale(1) rotateZ(0deg) translateY(0);}
+}
+
+/* Animated Shine Effect on Buttons */
+.btn-check, .btn-download, .btn-back, .btn-submit-testimonial {
+    /* ...existing code... */
+    overflow: hidden;
+}
+.btn-check::before, .btn-download::before, .btn-back::before, .btn-submit-testimonial::before {
+    content: '';
+    position: absolute;
+    left: -75px; top: 0;
+    width: 50px; height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.0) 100%);
+    transform: skewX(-25deg);
+    opacity: 0.7;
+    pointer-events: none;
+    animation: btnShine 2.8s infinite linear;
+}
+@keyframes btnShine {
+    0% { left: -75px; }
+    80% { left: 110%; }
+    100% { left: 110%; }
+}
+
+/* Animated Pulse for Section Titles */
+.card h2, .testimoni-section h2, .teacher-message-display-section h2, .testimonial-display-section h2 {
+    animation: titlePulse 2.5s infinite alternate;
+}
+@keyframes titlePulse {
+    0% { text-shadow: 0 0 8px #28a74544, 0 2px 8px #00a2ed44; }
+    100% { text-shadow: 0 0 18px #28a74577, 0 2px 18px #00a2ed77; }
+}
+
+/* Animated Floating Up for Testimonial Items */
+.testimoni-item, .testimonial-list-public-item, .teacher-message-list-public-item {
+    animation: floatUp 2.8s ease-in-out infinite alternate;
+}
+@keyframes floatUp {
+    0% { transform: translateY(0);}
+    100% { transform: translateY(-8px);}
+}
+
+/* Animated Bounce for Like Button on Hover */
+.like-button:hover {
+    animation: bounceLike 0.5s;
+}
+@keyframes bounceLike {
+    0% { transform: scale(1);}
+    30% { transform: scale(1.15);}
+    60% { transform: scale(0.95);}
+    100% { transform: scale(1);}
+}
+
+/* Animated Slide-in for Sidebar Sections */
+.sidebar-column > section {
+    animation: sidebarSlideIn 1.2s cubic-bezier(.4,1.5,.5,1) both;
+}
+@keyframes sidebarSlideIn {
+    0% { opacity: 0; transform: translateX(60px);}
+    100% { opacity: 1; transform: translateX(0);}
+}
+
+/* Animated Glow for Inputs on Focus */
+input:focus, textarea:focus {
+    box-shadow: 0 0 0 4px #28a74533, 0 0 8px #007bff44;
+    transition: box-shadow 0.3s;
+}
+
+/* Animated Rainbow Border for Main Content */
+.main-content {
+    /* ...existing code... */
+    border-radius: 18px;
+    border: 3px solid;
+    border-image: linear-gradient(90deg, #28a745, #007bff, #00c6fb, #28a745) 1;
+    animation: mainBorderRainbow 8s linear infinite;
+}
+@keyframes mainBorderRainbow {
+    0% { border-image-source: linear-gradient(90deg, #28a745, #007bff, #00c6fb, #28a745);}
+    100% { border-image-source: linear-gradient(270deg, #28a745, #007bff, #00c6fb, #28a745);}
+}
+
+/* Animated Pop for Comment Form Button */
+.comment-form button {
+    /* ...existing code... */
+    animation: popBtn 2.2s infinite alternate;
+}
+@keyframes popBtn {
+    0% { box-shadow: 0 2px 8px #28a74533;}
+    100% { box-shadow: 0 6px 16px #007bff33;}
+}
+
+/* Animated Fade-in for Info Text */
+.info-text {
+    animation: fadeInInfo 2s cubic-bezier(.4,1.5,.5,1) both;
+}
+@keyframes fadeInInfo {
+    0% { opacity: 0;}
+    100% { opacity: 1;}
+}
