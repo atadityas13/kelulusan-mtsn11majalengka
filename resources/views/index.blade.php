@@ -567,7 +567,7 @@
                 formData.append('signature', signatureData);
 
                 try {
-                    var response = await fetch('{{ route("save.signature") }}', {
+                    var response = await fetch('{{ route("interaction.signature") }}', {
                         method: 'POST',
                         headers: { 'X-CSRF-TOKEN': window.csrfToken },
                         body: formData
