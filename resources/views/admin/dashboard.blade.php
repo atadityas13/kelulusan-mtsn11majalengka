@@ -360,6 +360,7 @@
                                     <th>NISN</th>
                                     <th>Nama Lengkap</th>
                                     <th>Kelas</th>
+                                    <th>No. SKL</th>
                                     <th>Hasil</th>
                                     <th>Waktu Rilis Batch</th>
                                     <th>Tindakan</th>
@@ -427,16 +428,17 @@
                             @csrf
                             <input type="hidden" name="academic_year_id" value="{{ $selectedYearId }}">
                             <div class="modal-header">
-                                <h3>Import Siswa Lulusan Massal (JSON) - TA {{ $selectedYear->year }}</h3>
+                                <h3>Import Siswa Lulusan Massal (CSV/JSON) - TA {{ $selectedYear->year }}</h3>
                                 <button type="button" class="modal-close" onclick="closeModal('importModal')">&times;</button>
                             </div>
                             <div class="modal-body">
-                                <p style="font-size:0.9em; line-height: 1.5; color: var(--text-muted); margin-bottom: 20px;">
-                                    Silakan unggah berkas JSON data kelulusan. Sistem otomatis memasukkan data baru dan mengabaikan data duplikat berdasarkan NISN/Nomor Peserta.
+                                <p style="font-size:0.9em; line-height: 1.5; color: var(--text-muted); margin-bottom: 12px;">
+                                    Silakan unggah berkas Excel (.xlsx) dengan format template yang benar. Template bisa diunduh di bawah, diisi menggunakan Microsoft Excel atau Google Sheets, kemudian diupload kembali.
                                 </p>
+                                <p style="font-size:0.9em; margin-bottom: 18px;"><a href="{{ route('admin.student.template') }}" download>Download template impor siswa (Excel)</a></p>
                                 <div class="form-group-db">
-                                    <label for="json_file">Pilih Berkas JSON Data Siswa Lulusan</label>
-                                    <input type="file" id="json_file" name="json_file" class="form-control" accept=".json" required>
+                                    <label for="json_file">Pilih File Excel Template Siswa Lulusan</label>
+                                    <input type="file" id="json_file" name="json_file" class="form-control" accept=".xlsx" required>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -450,7 +452,7 @@
                 <!-- MODAL CRUD SISWA (ADD / EDIT) -->
                 <div id="studentFormModal" class="modal" style="display: none;">
                     <div class="modal-content">
-                        <form action="{{ route('admin.student.add') }}" method="POST" id="studentForm">
+                        <form action="{{ route('admin.student.add') }}" method="POST" id="studentForm" enctype="multipart/form-data">
                             @csrf
                             <input type="hidden" name="academic_year_id" value="{{ $selectedYearId }}">
                             <input type="hidden" name="id" id="studentId" value="">
@@ -503,6 +505,17 @@
 
                                 <div class="form-row">
                                     <div class="form-group-db">
+                                        <label for="foto">Foto Siswa (opsional)</label>
+                                        <input type="file" id="foto" name="foto" class="form-control" accept="image/jpeg,image/png">
+                                    </div>
+                                    <div class="form-group-db">
+                                        <label for="nomor_skl">Nomor SKL</label>
+                                        <input type="text" id="nomor_skl" name="nomor_skl" class="form-control" placeholder="Contoh: SKL-2026-001">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group-db">
                                         <label for="status_kelulusan">Status Kelulusan</label>
                                         <select id="status_kelulusan" name="status_kelulusan" class="form-control">
                                             <option value="Lulus">Lulus</option>
@@ -548,6 +561,7 @@
                         document.getElementById('nama').value = student.nama;
                         document.getElementById('jenis_kelamin').value = student.jenis_kelamin;
                         document.getElementById('kelas').value = student.kelas;
+                        document.getElementById('nomor_skl').value = student.nomor_skl || '';
                         document.getElementById('tempat_lahir').value = student.tempat_lahir;
                         
                         if (student.tanggal_lahir) {

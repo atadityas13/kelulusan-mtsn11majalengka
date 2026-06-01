@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\AcademicYear;
 use App\Models\Student;
+use App\Models\StudentGrade;
 use App\Models\Testimonial;
 use App\Models\TeacherMessage;
 use App\Models\Comment;
@@ -14,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use ZipArchive;
+use Illuminate\Support\Facades\Response;
 
 class AdminController extends Controller
 {
@@ -94,6 +97,7 @@ class AdminController extends Controller
                     $q->where('nama', 'like', "%$search%")
                       ->orWhere('nisn', 'like', "%$search%")
                       ->orWhere('nomor_peserta', 'like', "%$search%")
+                      ->orWhere('nomor_skl', 'like', "%$search%")
                       ->orWhere('kelas', 'like', "%$search%");
                 });
             }
@@ -151,7 +155,177 @@ class AdminController extends Controller
     }
 
     // ========================================================
-    // A. TINDAKAN MANAJEMEN SISWA
+    // TEMPLATE DOWNLOAD
+    // ========================================================
+
+    public function downloadStudentTemplate()
+    {
+        $excel = $this->createExcelTemplate();
+        $filename = 'template_import_siswa_' . date('Y-m-d') . '.xlsx';
+
+        return Response::make($excel, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    private function createExcelTemplate()
+    {
+        $columns = [
+            'nomor_peserta',
+            'nisn',
+            'nama',
+            'tempat_lahir',
+            'tanggal_lahir',
+            'jenis_kelamin',
+            'foto',
+            'status_kelulusan',
+            'nomor_skl',
+            'Pendidikan Agama Islam - Al Qur\'an Hadis',
+            'Pendidikan Agama Islam - Akidah Akhlak',
+            'Pendidikan Agama Islam - Fikih',
+            'Pendidikan Agama Islam - Sejarah Kebudayaan Islam',
+            'Pendidikan Pancasila',
+            'Bahasa Indonesia',
+            'Bahasa Arab',
+            'Matematika',
+            'Ilmu Pengetahuan Alam',
+            'Ilmu Pengetahuan Sosial',
+            'Bahasa Inggris',
+            'Seni dan Prakarya',
+            'Pendidikan Jasmani Olahraga dan Kesehatan',
+            'Informatika',
+            'Muatan Lokal - Bahasa Sunda',
+        ];
+
+        $sampleData = [
+            [
+                '25-10-10-2-0089-0001',
+                '0098765432',
+                'Ahmad Fajar',
+                'Majalengka',
+                '2008-03-15',
+                'Laki-laki',
+                '',
+                'Lulus',
+                'SKL-2026-001',
+                88, 90, 85, 87, 92, 89, 86, 93, 91, 90, 88, 89, 87, 90,
+            ]
+        ];
+
+        $zip = new ZipArchive();
+        $tempFile = tempnam(sys_get_temp_dir(), 'xlsx');
+        
+        if ($zip->open($tempFile, ZipArchive::CREATE) === true) {
+            $zip->addFromString('_rels/.rels', $this->getRelationshipsXml());
+            $zip->addFromString('xl/_rels/workbook.xml.rels', $this->getWorkbookRelationshipsXml());
+            $zip->addFromString('xl/workbook.xml', $this->getWorkbookXml());
+            $zip->addFromString('xl/worksheets/sheet1.xml', $this->getWorksheetXml($columns, $sampleData));
+            $zip->addFromString('xl/styles.xml', $this->getStylesXml());
+            $zip->addFromString('[Content_Types].xml', $this->getContentTypesXml());
+            $zip->close();
+        }
+
+        $excel = file_get_contents($tempFile);
+        unlink($tempFile);
+
+        return $excel;
+    }
+
+    private function getRelationshipsXml()
+    {
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>';
+    }
+
+    private function getWorkbookRelationshipsXml()
+    {
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>';
+    }
+
+    private function getWorkbookXml()
+    {
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<fileVersion appName="xl" lastEdited="4" lowestEdited="4" rupBuild="4505"/>
+<workbookPr defaultTheme="1"/>
+<bookViews><workbookView xWindow="0" yWindow="0" windowWidth="19020" windowHeight="11010" tabRatio="500" activeTab="0"/></bookViews>
+<sheets><sheet name="Data Siswa" sheetId="1" r:id="rId1"/></sheets>
+</workbook>';
+    }
+
+    private function getWorksheetXml($columns, $data)
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<sheetData>';
+
+        $xml .= '<row r="1">';
+        foreach ($columns as $col => $header) {
+            $xml .= '<c r="' . $this->getExcelColumn($col) . '1" t="str" s="1"><v>' . htmlspecialchars($header, ENT_XML1) . '</v></c>';
+        }
+        $xml .= '</row>';
+
+        $rowNum = 2;
+        foreach ($data as $row) {
+            $xml .= '<row r="' . $rowNum . '">';
+            foreach ($row as $col => $value) {
+                $colLetter = $this->getExcelColumn($col);
+                if (is_numeric($value)) {
+                    $xml .= '<c r="' . $colLetter . $rowNum . '"><v>' . $value . '</v></c>';
+                } else {
+                    $xml .= '<c r="' . $colLetter . $rowNum . '" t="str"><v>' . htmlspecialchars($value, ENT_XML1) . '</v></c>';
+                }
+            }
+            $xml .= '</row>';
+            $rowNum++;
+        }
+
+        $xml .= '</sheetData></worksheet>';
+
+        return $xml;
+    }
+
+    private function getStylesXml()
+    {
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<fonts><font><sz val="11"/><color theme="1"/><name val="Calibri"/><family val="2"/></font></fonts>
+<fills><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFD3D3D3"/></patternFill></fill></fills>
+<borders><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+<cellXfs><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/><xf numFmtId="0" fontId="0" fillId="2" borderId="0" applyFill="1" applyFont="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs>
+</styleSheet>';
+    }
+
+    private function getContentTypesXml()
+    {
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>';
+    }
+
+    private function getExcelColumn($index)
+    {
+        $col = '';
+        while ($index >= 0) {
+            $col = chr(65 + ($index % 26)) . $col;
+            $index = intval($index / 26) - 1;
+        }
+        return $col;
+    }
+
+    // ========================================================
     // ========================================================
 
     public function addStudent(Request $request)
@@ -165,7 +339,9 @@ class AdminController extends Controller
             'tempat_lahir' => 'nullable|string|max:100',
             'tanggal_lahir' => 'required|date',
             'kelas' => 'required|string|max:20',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'status_kelulusan' => 'required|in:Lulus,Tidak Lulus,Ditangguhkan',
+            'nomor_skl' => 'nullable|string|max:100',
             'release_timestamp' => 'nullable|date',
         ]);
 
@@ -178,6 +354,10 @@ class AdminController extends Controller
 
         if ($exists) {
             return back()->with('error', 'Gagal! Nomor Peserta atau NISN sudah terdaftar pada tahun ajaran ini.')->withInput();
+        }
+
+        if ($request->hasFile('foto')) {
+            $data['foto'] = $request->file('foto')->store('uploads/foto_siswa', 'public');
         }
 
         Student::create($data);
@@ -196,7 +376,9 @@ class AdminController extends Controller
             'tempat_lahir' => 'nullable|string|max:100',
             'tanggal_lahir' => 'required|date',
             'kelas' => 'required|string|max:20',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'status_kelulusan' => 'required|in:Lulus,Tidak Lulus,Ditangguhkan',
+            'nomor_skl' => 'nullable|string|max:100',
             'release_timestamp' => 'nullable|date',
         ]);
 
@@ -211,6 +393,10 @@ class AdminController extends Controller
 
         if ($exists) {
             return back()->with('error', 'Gagal! Nomor Peserta atau NISN sudah terdaftar pada siswa lain di tahun ajaran ini.');
+        }
+
+        if ($request->hasFile('foto')) {
+            $data['foto'] = $request->file('foto')->store('uploads/foto_siswa', 'public');
         }
 
         $student->update($data);
@@ -228,16 +414,28 @@ class AdminController extends Controller
     public function importStudents(Request $request)
     {
         $request->validate([
-            'json_file' => 'required|file',
+            'json_file' => 'required|file|mimes:xlsx,xls,csv,json',
             'academic_year_id' => 'required|exists:academic_years,id'
         ]);
 
         $file = $request->file('json_file');
-        $studentsData = json_decode(file_get_contents($file->getRealPath()), true);
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        if ($extension === 'xlsx' || $extension === 'xls') {
+            $studentsData = $this->parseExcelFile($file->getRealPath());
+        } elseif ($extension === 'csv') {
+            $studentsData = $this->parseCsvFile($file->getRealPath());
+        } else {
+            $studentsData = json_decode(file_get_contents($file->getRealPath()), true);
+        }
 
         if (!is_array($studentsData)) {
-            return back()->with('error', 'Format file JSON tidak valid.');
+            return back()->with('error', 'Format file tidak valid. Gunakan Excel, CSV, atau JSON dengan template yang benar.');
         }
+
+        $studentsData = array_map(function ($row) {
+            return $this->normalizeImportRow((array) $row);
+        }, $studentsData);
 
         $inserted = 0;
         $skipped = 0;
@@ -245,8 +443,8 @@ class AdminController extends Controller
 
         try {
             foreach ($studentsData as $student) {
-                $nopes = trim($student['nomor_peserta'] ?? '');
-                $nisn = trim($student['nisn'] ?? '');
+                $nopes = trim($this->getImportValue($student, ['nomor_peserta', 'nopes']));
+                $nisn = trim($this->getImportValue($student, ['nisn']));
 
                 if (empty($nopes) || empty($nisn)) {
                     $skipped++;
@@ -260,18 +458,46 @@ class AdminController extends Controller
                     })->exists();
 
                 if (!$exists) {
-                    Student::create([
+                    $studentRecord = Student::create([
                         'academic_year_id' => $yearId,
                         'nomor_peserta' => $nopes,
                         'nisn' => $nisn,
-                        'nama' => trim($student['nama'] ?? 'Tanpa Nama'),
-                        'jenis_kelamin' => $student['jenis_kelamin'] ?? 'Laki-laki',
-                        'tempat_lahir' => trim($student['tempat_lahir'] ?? 'Majalengka'),
-                        'tanggal_lahir' => $student['tanggal_lahir'] ?? date('Y-m-d'),
-                        'kelas' => trim($student['kelas'] ?? 'IX'),
-                        'status_kelulusan' => $student['status_kelulusan'] ?? 'Lulus',
-                        'release_timestamp' => $student['release_timestamp'] ?? null
+                        'nama' => trim($this->getImportValue($student, ['nama', 'nama_lengkap'], 'Tanpa Nama')),
+                        'jenis_kelamin' => $this->getImportValue($student, ['jenis_kelamin'], 'Laki-laki'),
+                        'tempat_lahir' => trim($this->getImportValue($student, ['tempat_lahir'], 'Majalengka')),
+                        'tanggal_lahir' => $this->getImportValue($student, ['tanggal_lahir'], date('Y-m-d')),
+                        'kelas' => trim($this->getImportValue($student, ['kelas'], 'IX')),
+                        'foto' => trim($this->getImportValue($student, ['foto'], '')),
+                        'status_kelulusan' => $this->getImportValue($student, ['status_kelulusan'], 'Lulus'),
+                        'nomor_skl' => trim($this->getImportValue($student, ['nomor_skl', 'no_skl'], '')),
+                        'release_timestamp' => $this->getImportValue($student, ['release_timestamp'], null),
                     ]);
+
+                    $gradeData = [
+                        'student_id' => $studentRecord->id,
+                        'academic_year_id' => $yearId,
+                        'agama_al_quran_hadis' => $this->getImportValue($student, ['agama_al_quran_hadis', 'pendidikan_agama_islam_al_qur_an_hadis', 'pendidikan_agama_islam_al_quran_hadis']),
+                        'agama_akidah_akhlak' => $this->getImportValue($student, ['agama_akidah_akhlak', 'pendidikan_agama_islam_akidah_akhlak']),
+                        'agama_fikih' => $this->getImportValue($student, ['agama_fikih', 'pendidikan_agama_islam_fikih']),
+                        'agama_sejarah_kebudayaan_islam' => $this->getImportValue($student, ['agama_sejarah_kebudayaan_islam', 'pendidikan_agama_islam_sejarah_kebudayaan_islam']),
+                        'pendidikan_pancasila' => $this->getImportValue($student, ['pendidikan_pancasila']),
+                        'bahasa_indonesia' => $this->getImportValue($student, ['bahasa_indonesia']),
+                        'bahasa_arab' => $this->getImportValue($student, ['bahasa_arab']),
+                        'matematika' => $this->getImportValue($student, ['matematika']),
+                        'ilmu_pengetahuan_alam' => $this->getImportValue($student, ['ilmu_pengetahuan_alam']),
+                        'ilmu_pengetahuan_sosial' => $this->getImportValue($student, ['ilmu_pengetahuan_sosial']),
+                        'bahasa_inggris' => $this->getImportValue($student, ['bahasa_inggris']),
+                        'seni_dan_prakarya' => $this->getImportValue($student, ['seni_dan_prakarya']),
+                        'pendidikan_jasmani_olahraga_dan_kesehatan' => $this->getImportValue($student, ['pendidikan_jasmani_olahraga_dan_kesehatan']),
+                        'informatika' => $this->getImportValue($student, ['informatika']),
+                        'muatan_lokal_bahasa_sunda' => $this->getImportValue($student, ['muatan_lokal_bahasa_sunda', 'muatan_lokal_bahasa_sunda']),
+                    ];
+
+                    $gradeValues = array_filter(array_slice($gradeData, 2), fn($value) => $value !== null && $value !== '');
+                    if (!empty($gradeValues)) {
+                        StudentGrade::create($gradeData);
+                    }
+
                     $inserted++;
                 } else {
                     $skipped++;
@@ -281,6 +507,102 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memproses import data: ' . $e->getMessage());
         }
+    }
+
+    private function parseCsvFile(string $path): array
+    {
+        $rows = [];
+
+        if (($handle = fopen($path, 'r')) !== false) {
+            $header = null;
+
+            while (($line = fgetcsv($handle, 0, ',')) !== false) {
+                if (!$header) {
+                    $header = array_map([$this, 'normalizeImportHeader'], $line);
+                    continue;
+                }
+
+                $line = array_pad($line, count($header), '');
+                $rows[] = array_combine($header, $line);
+            }
+
+            fclose($handle);
+        }
+
+        return $rows;
+    }
+
+    private function parseExcelFile(string $path): array
+    {
+        $rows = [];
+        $zip = new ZipArchive();
+
+        if ($zip->open($path) === true) {
+            if (($sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml')) === false) {
+                $zip->close();
+                return [];
+            }
+
+            $xml = simplexml_load_string($sheetXml);
+            $header = null;
+            $rowNum = 0;
+
+            foreach ($xml->sheetData->row as $row) {
+                $rowNum++;
+                $values = [];
+
+                foreach ($row->c as $cell) {
+                    $cellValue = (string) $cell->v;
+                    $values[] = $cellValue;
+                }
+
+                if ($rowNum === 1) {
+                    $header = array_map([$this, 'normalizeImportHeader'], $values);
+                    continue;
+                }
+
+                if ($header) {
+                    $values = array_pad($values, count($header), '');
+                    $rows[] = array_combine($header, $values);
+                }
+            }
+
+            $zip->close();
+        }
+
+        return $rows;
+    }
+
+    private function normalizeImportHeader(string $header): string
+    {
+        $header = trim($header);
+        $header = strtolower($header);
+        $header = preg_replace('/[\s\/\\\-&\.\'"\(\):]+/', '_', $header);
+        $header = preg_replace('/[^a-z0-9_]+/', '', $header);
+        $header = preg_replace('/_+/', '_', $header);
+        return trim($header, '_');
+    }
+
+    private function normalizeImportRow(array $row): array
+    {
+        $normalized = [];
+
+        foreach ($row as $key => $value) {
+            $normalized[$this->normalizeImportHeader($key)] = trim((string) $value);
+        }
+
+        return $normalized;
+    }
+
+    private function getImportValue(array $row, array $keys, $default = null)
+    {
+        foreach ($keys as $key) {
+            if (isset($row[$key]) && $row[$key] !== '') {
+                return $row[$key];
+            }
+        }
+
+        return $default;
     }
 
     // ========================================================

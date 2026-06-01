@@ -41,6 +41,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Dasbor Utama
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
+    // Template Download
+    Route::get('/students/template/download', [AdminController::class, 'downloadStudentTemplate'])->name('admin.student.template');
+
     // Manajemen Siswa (Students CRUD)
     Route::post('/students/add', [AdminController::class, 'addStudent'])->name('admin.student.add');
     Route::post('/students/edit/{id}', [AdminController::class, 'editStudent'])->name('admin.student.edit');

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\StudentGrade;
 
 class Student extends Model
 {
@@ -15,7 +16,9 @@ class Student extends Model
         'tempat_lahir',
         'tanggal_lahir',
         'kelas',
+        'foto',
         'status_kelulusan',
+        'nomor_skl',
         'release_timestamp',
         'signature',
     ];
@@ -31,6 +34,11 @@ class Student extends Model
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function grades()
+    {
+        return $this->hasOne(StudentGrade::class);
     }
 }
 ?>

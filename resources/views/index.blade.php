@@ -234,6 +234,7 @@
                                             <h2 class="status-lulus">Selamat!<br> {{ $foundStudent->nama }}</h2>
                                             
                                             <p class="student-info"><span class="info-label">Nomor Peserta</span> <span class="info-value"><strong>: {{ $foundStudent->nomor_peserta }}</strong></span></p>
+                                            <p class="student-info"><span class="info-label">Nomor SKL</span> <span class="info-value"><strong>: {{ $foundStudent->nomor_skl }}</strong></span></p>
                                             <p class="student-info"><span class="info-label">NISN</span> <span class="info-value"><strong>: {{ $foundStudent->nisn }}</strong></span></p>
                                             <p class="student-info"><span class="info-label">TTL</span> <span class="info-value"><strong>: {{ $foundStudent->tempat_lahir }}, {{ $foundStudent->tanggal_lahir->format('d-m-Y') }}</strong></span></p>
                                             <p class="student-info"><span class="info-label">Jenis Kelamin</span> <span class="info-value"><strong>: {{ $foundStudent->jenis_kelamin }}</strong></span></p>
