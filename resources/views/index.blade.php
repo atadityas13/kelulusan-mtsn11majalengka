@@ -597,17 +597,30 @@
             checkbox.addEventListener('change', function() {
                 validateAgreement();
             });
+            // Helper untuk mengonversi Base64 Data URL menjadi biner Blob (Bypass WAF/ModSecurity)
+            function dataURLtoBlob(dataurl) {
+                var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                    bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+                while(n--){
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new Blob([u8arr], {type:mime});
+            }
+
             btn.addEventListener('click', async function() {
                 btn.disabled = true;
                 btn.textContent = 'Menyimpan...';
 
-                var signatureData = canvas.toDataURL('image/png');
-                var formData = new FormData();
-                formData.append('_token', '{{ csrf_token() }}');
-                formData.append('nomorPeserta', "{{ $foundStudent->nomor_peserta ?? '' }}");
-                formData.append('signature', signatureData);
-
                 try {
+                    var signatureData = canvas.toDataURL('image/png');
+                    var signatureBlob = dataURLtoBlob(signatureData);
+                    
+                    var formData = new FormData();
+                    formData.append('_token', '{{ csrf_token() }}');
+                    formData.append('nomorPeserta', "{{ $foundStudent->nomor_peserta ?? '' }}");
+                    // Kirim sebagai berkas biner/file upload agar lolos dari blokir ModSecurity
+                    formData.append('signature_file', signatureBlob, 'signature.png');
+
                     var response = await fetch('{{ route("interaction.signature") }}', {
                         method: 'POST',
                         body: formData

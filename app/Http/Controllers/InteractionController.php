@@ -165,13 +165,19 @@ class InteractionController extends Controller
         }
     }
 
-    /**
-     * Menyimpan tanda tangan digital siswa via AJAX
-     */
     public function saveSignature(Request $request)
     {
         $nomorPeserta = trim($request->input('nomorPeserta', ''));
-        $signature = trim($request->input('signature', ''));
+        
+        // Deteksi apakah tanda tangan dikirim sebagai file biner untuk bypass WAF/ModSecurity
+        if ($request->hasFile('signature_file')) {
+            $file = $request->file('signature_file');
+            $binaryData = file_get_contents($file->getRealPath());
+            $signature = 'data:image/png;base64,' . base64_encode($binaryData);
+        } else {
+            // Fallback ke input teks Base64 biasa jika lolos firewall
+            $signature = trim($request->input('signature', ''));
+        }
 
         if (empty($nomorPeserta) || empty($signature)) {
             return response()->json(['success' => false, 'message' => 'Nomor Peserta dan Tanda Tangan wajib diisi.']);
