@@ -25,6 +25,7 @@ Route::post('/interaction/check-history', [InteractionController::class, 'saveCh
 Route::post('/interaction/testimonial', [InteractionController::class, 'saveTestimonial'])->name('interaction.testimonial');
 Route::post('/interaction/like', [InteractionController::class, 'likeItem'])->name('interaction.like');
 Route::post('/interaction/comment', [InteractionController::class, 'addComment'])->name('interaction.comment');
+Route::post('/interaction/signature', [InteractionController::class, 'saveSignature'])->name('interaction.signature');
 
 // ========================================================
 // 3. RUTE AUTENTIKASI ADMIN

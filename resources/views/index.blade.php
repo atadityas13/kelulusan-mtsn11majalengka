@@ -50,6 +50,20 @@
                 b. Proses pendaftaran ke sekolah menengah atas tidak akan diproses akun PPDB-nya tidak akan diaktifkan;<br>
                 c. Ijazah tidak akan diberikan.
             </div>
+
+            <!-- Tanda Tangan Digital Pad -->
+            <div class="signature-section" style="margin-bottom: 25px;">
+                <label style="display: block; font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.95em; text-align: left;">
+                    Bubuhkan Tanda Tangan Digital Anda di Bawah Ini:
+                </label>
+                <div style="border: 2px dashed #cbd5e1; border-radius: 12px; background-color: #f8fafc; position: relative; overflow: hidden; height: 180px;">
+                    <canvas id="signature-pad" style="width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none;"></canvas>
+                    <button type="button" id="btn-clear-signature" style="position: absolute; bottom: 10px; right: 10px; padding: 6px 12px; background-color: #64748b; color: white; border: none; border-radius: 6px; font-size: 0.8em; font-weight: 600; cursor: pointer; transition: background-color 0.2s; font-family: inherit;">
+                        <i class="fa-solid fa-eraser"></i> Bersihkan
+                    </button>
+                </div>
+            </div>
+
             <div class="modal-warning-checkbox-group">
                 <input type="checkbox" id="modal-warning-checkbox">
                 <label for="modal-warning-checkbox" style="user-select: none;">
@@ -457,19 +471,121 @@
         revealEls.forEach(el => observer.observe(el));
     });
 
-    // Kontrol Himbauan Modal Pada Halaman Hasil Kelulusan
+    // Kontrol Himbauan Modal Pada Halaman Hasil Kelulusan dengan Tanda Tangan
     document.addEventListener('DOMContentLoaded', function() {
         var modal = document.getElementById('modal-warning-overlay');
         var btn = document.getElementById('btn-modal-confirm');
         var checkbox = document.getElementById('modal-warning-checkbox');
         
-        if (modal && btn && checkbox) {
-            btn.disabled = !checkbox.checked;
-            checkbox.addEventListener('change', function() {
-                btn.disabled = !checkbox.checked;
+        // Setup Tanda Tangan Canvas
+        var canvas = document.getElementById('signature-pad');
+        var btnClear = document.getElementById('btn-clear-signature');
+        var isDrawing = false;
+        var hasSigned = false;
+
+        if (canvas) {
+            var ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                var rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.strokeStyle = '#1e3a8a'; // Tinta biru tua
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            }
+
+            setTimeout(resizeCanvas, 300);
+            window.addEventListener('resize', resizeCanvas);
+
+            btnClear.addEventListener('click', function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                hasSigned = false;
+                validateAgreement();
             });
-            btn.addEventListener('click', function() {
-                modal.style.display = 'none';
+
+            function getCoords(e) {
+                var rect = canvas.getBoundingClientRect();
+                var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function startDrawing(e) {
+                isDrawing = true;
+                var coords = getCoords(e);
+                ctx.beginPath();
+                ctx.moveTo(coords.x, coords.y);
+                e.preventDefault();
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                var coords = getCoords(e);
+                ctx.lineTo(coords.x, coords.y);
+                ctx.stroke();
+                hasSigned = true;
+                validateAgreement();
+                e.preventDefault();
+            }
+
+            function stopDrawing() {
+                isDrawing = false;
+            }
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function validateAgreement() {
+            if (checkbox && btn) {
+                btn.disabled = !(checkbox.checked && hasSigned);
+            }
+        }
+        
+        if (modal && btn && checkbox) {
+            checkbox.addEventListener('change', function() {
+                validateAgreement();
+            });
+            btn.addEventListener('click', async function() {
+                btn.disabled = true;
+                btn.textContent = 'Menyimpan...';
+
+                var signatureData = canvas.toDataURL('image/png');
+                var formData = new FormData();
+                formData.append('nomorPeserta', "{{ $foundStudent->nomor_peserta ?? '' }}");
+                formData.append('signature', signatureData);
+
+                try {
+                    var response = await fetch('{{ route("save.signature") }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': window.csrfToken },
+                        body: formData
+                    });
+                    var data = await response.json();
+                    
+                    if (data.success) {
+                        modal.style.display = 'none';
+                    } else {
+                        alert('Gagal menyimpan tanda tangan: ' + data.message);
+                        btn.disabled = false;
+                        btn.textContent = 'Mengerti';
+                    }
+                } catch (e) {
+                    alert('Gagal terhubung ke server.');
+                    btn.disabled = false;
+                    btn.textContent = 'Mengerti';
+                }
             });
         }
     });

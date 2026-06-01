@@ -17,6 +17,7 @@ class Student extends Model
         'kelas',
         'status_kelulusan',
         'release_timestamp',
+        'signature',
     ];
 
     protected $casts = [

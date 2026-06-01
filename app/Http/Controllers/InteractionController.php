@@ -164,5 +164,30 @@ class InteractionController extends Controller
             return response()->json(['success' => false, 'message' => 'Gagal mengirim komentar: ' . $e->getMessage()]);
         }
     }
+
+    /**
+     * Menyimpan tanda tangan digital siswa via AJAX
+     */
+    public function saveSignature(Request $request)
+    {
+        $nomorPeserta = trim($request->input('nomorPeserta', ''));
+        $signature = trim($request->input('signature', ''));
+
+        if (empty($nomorPeserta) || empty($signature)) {
+            return response()->json(['success' => false, 'message' => 'Nomor Peserta dan Tanda Tangan wajib diisi.']);
+        }
+
+        try {
+            $student = \App\Models\Student::where('nomor_peserta', $nomorPeserta)->first();
+            if ($student) {
+                $student->signature = $signature;
+                $student->save();
+                return response()->json(['success' => true, 'message' => 'Tanda tangan berhasil disimpan.']);
+            }
+            return response()->json(['success' => false, 'message' => 'Siswa tidak ditemukan.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal menyimpan tanda tangan: ' . $e->getMessage()]);
+        }
+    }
 }
 ?>
