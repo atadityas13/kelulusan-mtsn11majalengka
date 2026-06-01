@@ -603,13 +603,13 @@
 
                 var signatureData = canvas.toDataURL('image/png');
                 var formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
                 formData.append('nomorPeserta', "{{ $foundStudent->nomor_peserta ?? '' }}");
                 formData.append('signature', signatureData);
 
                 try {
                     var response = await fetch('{{ route("interaction.signature") }}', {
                         method: 'POST',
-                        headers: { 'X-CSRF-TOKEN': window.csrfToken },
                         body: formData
                     });
                     var data = await response.json();
