@@ -788,7 +788,7 @@
                                 </div>
 
                                 <div class="form-group-db">
-                                    <label for="target_date">Tanggal & Waktu Pengumuman Dibuka</label>
+                                    <label for="target_date">Tanggal &amp; Waktu Pengumuman Dibuka</label>
                                     <input type="text" id="target_date" name="target_date" class="form-control" placeholder="Format: YYYY-MM-DD HH:MM:SS" value="{{ $activeYear->target_date }}" required>
                                     <small style="color:var(--text-muted); font-size:0.75em; display:block; margin-top:5px;">Contoh format waktu: <code>2025-06-02 15:00:00</code> (WIB)</small>
                                 </div>
@@ -801,7 +801,25 @@
                                     <small style="color:var(--text-muted); font-size:0.75em; display:block; margin-top:5px; margin-left: 32px;">Menyembunyikan form kelulusan di halaman depan dan mengunci akses siswa sementara.</small>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;"><i class="fa-solid fa-floppy-disk"></i> Simpan Konfigurasi Pengumuman</button>
+                                <hr style="border:none; border-top:1px solid var(--border); margin: 20px 0;">
+                                <p style="font-size:0.8em; color:var(--text-muted); margin-bottom:16px;">Perubahan pada Kepala Madrasah akan langsung tampil di halaman depan setelah disimpan.</p>
+
+                                <div class="form-group-db">
+                                    <label for="kepala_nama"><i class="fa-solid fa-user-tie" style="margin-right:6px; color:var(--primary);"></i> Nama Kepala Madrasah</label>
+                                    <input type="text" id="kepala_nama" name="kepala_nama" class="form-control" placeholder="Contoh: H. Asep Awaludin, S.Pd., M.M." value="{{ $settings['kepala_nama'] }}" required>
+                                </div>
+
+                                <div class="form-group-db">
+                                    <label for="kepala_jabatan"><i class="fa-solid fa-id-badge" style="margin-right:6px; color:var(--primary);"></i> Jabatan</label>
+                                    <input type="text" id="kepala_jabatan" name="kepala_jabatan" class="form-control" placeholder="Contoh: Kepala MTsN 11 Majalengka" value="{{ $settings['kepala_jabatan'] }}" required>
+                                </div>
+
+                                <div class="form-group-db">
+                                    <label for="kepala_pesan"><i class="fa-solid fa-message" style="margin-right:6px; color:var(--primary);"></i> Pesan Kepala Madrasah</label>
+                                    <textarea id="kepala_pesan" name="kepala_pesan" class="form-control" rows="5" placeholder="Tulis sambutan atau pesan dari Kepala Madrasah..." required style="resize:vertical;">{{ $settings['kepala_pesan'] }}</textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;"><i class="fa-solid fa-floppy-disk"></i> Simpan Semua Konfigurasi</button>
                             </form>
                         @else
                             <p style="text-align:center; color:#888;">Silakan buat dan aktifkan periode Tahun Ajaran terlebih dahulu untuk mengatur tanggal target rilis.</p>

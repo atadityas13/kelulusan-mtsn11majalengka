@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\TeacherMessage;
 use App\Models\Testimonial;
 use App\Models\CheckHistory;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -89,11 +90,11 @@ class HomeController extends Controller
             ->limit(5)
             ->get();
 
-        // Data Kepala Madrasah (dapat disesuaikan lewat Admin > Pengaturan nantinya)
+        // Data Kepala Madrasah dari database settings
         $kepalaMadrasahMessage = [
-            'name'     => 'H. Asep Awaludin, S.Pd., M.M.',
-            'position' => 'Kepala MTsN 11 Majalengka',
-            'message'  => 'Kami ucapkan selamat kepada seluruh siswa yang telah dinyatakan lulus. Semoga pencapaian ini menjadi batu lompatan menuju masa depan yang lebih cerah, gemilang, dan penuh keberkahan. Teruslah belajar, berprestasi, dan jaga nama baik almamater MTsN 11 Majalengka di manapun kalian berada.',
+            'name'     => Setting::get('kepala_nama', 'Kepala MTsN 11 Majalengka'),
+            'position' => Setting::get('kepala_jabatan', 'Kepala Madrasah'),
+            'message'  => Setting::get('kepala_pesan', 'Selamat kepada seluruh siswa yang telah dinyatakan lulus.'),
         ];
 
         return view('index', compact(

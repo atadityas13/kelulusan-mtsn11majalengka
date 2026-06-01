@@ -9,6 +9,7 @@ use App\Models\Testimonial;
 use App\Models\TeacherMessage;
 use App\Models\Comment;
 use App\Models\CheckHistory;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -119,6 +120,13 @@ class AdminController extends Controller
         // 6. Log Riwayat Terkini untuk Overview
         $recentChecks = CheckHistory::orderBy('id', 'desc')->limit(5)->get();
 
+        // 7. Data Pengaturan (Settings)
+        $settings = [
+            'kepala_nama'    => Setting::get('kepala_nama', ''),
+            'kepala_jabatan' => Setting::get('kepala_jabatan', ''),
+            'kepala_pesan'   => Setting::get('kepala_pesan', ''),
+        ];
+
         return view('admin.dashboard', compact(
             'activeTab',
             'statTotalStudents',
@@ -137,7 +145,8 @@ class AdminController extends Controller
             'historyList',
             'totalHistories',
             'historySearch',
-            'recentChecks'
+            'recentChecks',
+            'settings'
         ));
     }
 
@@ -399,17 +408,26 @@ class AdminController extends Controller
     public function saveSettings(Request $request)
     {
         $data = $request->validate([
-            'target_date' => 'required|date',
+            'target_date'      => 'required|date',
             'academic_year_id' => 'required|exists:academic_years,id',
+            'kepala_nama'      => 'required|string|max:150',
+            'kepala_jabatan'   => 'required|string|max:150',
+            'kepala_pesan'     => 'required|string',
         ]);
 
+        // Simpan pengaturan waktu & mode pemeliharaan ke tabel academic_years
         $year = AcademicYear::findOrFail($data['academic_year_id']);
         $year->update([
-            'target_date' => $data['target_date'],
+            'target_date'      => $data['target_date'],
             'maintenance_mode' => $request->has('maintenance_mode') ? true : false
         ]);
 
-        return back()->with('success', 'Pengaturan sistem berhasil diperbarui!');
+        // Simpan data Kepala Madrasah ke tabel settings
+        Setting::set('kepala_nama', $data['kepala_nama']);
+        Setting::set('kepala_jabatan', $data['kepala_jabatan']);
+        Setting::set('kepala_pesan', $data['kepala_pesan']);
+
+        return back()->with('success', 'Pengaturan sistem dan data Kepala Madrasah berhasil diperbarui!');
     }
 
     public function changePassword(Request $request)
