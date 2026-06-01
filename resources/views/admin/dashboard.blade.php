@@ -154,6 +154,71 @@
         .card-header { flex-direction: column; align-items: stretch; }
         .search-form { max-width: 100%; }
     }
+    /* --- PAGINATION --- */
+    .pagination-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding-top: 16px;
+    }
+    .pagination-info {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+    .pagination-links nav { display: flex; }
+    .pagination-links .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        gap: 4px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .pagination-links .pagination .page-item .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--card-bg);
+        color: var(--text-dark);
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+    .pagination-links .pagination .page-item .page-link:hover {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    .pagination-links .pagination .page-item.active .page-link {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    }
+    .pagination-links .pagination .page-item.disabled .page-link {
+        background: #f1f5f9;
+        border-color: var(--border);
+        color: #cbd5e1;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    @media (max-width: 600px) {
+        .pagination-links .pagination .page-item .page-link {
+            min-width: 32px;
+            height: 32px;
+            font-size: 12px;
+            padding: 0 6px;
+        }
+    }
 </style>
 @endsection
 
