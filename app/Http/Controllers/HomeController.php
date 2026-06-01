@@ -89,6 +89,13 @@ class HomeController extends Controller
             ->limit(5)
             ->get();
 
+        // Data Kepala Madrasah (dapat disesuaikan lewat Admin > Pengaturan nantinya)
+        $kepalaMadrasahMessage = [
+            'name'     => 'H. Asep Awaludin, S.Pd., M.M.',
+            'position' => 'Kepala MTsN 11 Majalengka',
+            'message'  => 'Kami ucapkan selamat kepada seluruh siswa yang telah dinyatakan lulus. Semoga pencapaian ini menjadi batu lompatan menuju masa depan yang lebih cerah, gemilang, dan penuh keberkahan. Teruslah belajar, berprestasi, dan jaga nama baik almamater MTsN 11 Majalengka di manapun kalian berada.',
+        ];
+
         return view('index', compact(
             'activeYear',
             'targetDate',
@@ -100,7 +107,8 @@ class HomeController extends Controller
             'batchReleaseTime',
             'teacherMessages',
             'testimonials',
-            'checkHistory'
+            'checkHistory',
+            'kepalaMadrasahMessage'
         ));
     }
 
