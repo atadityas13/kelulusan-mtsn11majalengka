@@ -233,11 +233,43 @@
                                         @if($isGraduated)
                                             <h2 class="status-lulus">Selamat!<br> {{ $foundStudent->nama }}</h2>
                                             
-                                            <p class="student-info"><span class="info-label">Nomor Peserta</span> <span class="info-value"><strong>: {{ $foundStudent->nomor_peserta }}</strong></span></p>
-                                            <p class="student-info"><span class="info-label">NISN</span> <span class="info-value"><strong>: {{ $foundStudent->nisn }}</strong></span></p>
-                                            <p class="student-info"><span class="info-label">TTL</span> <span class="info-value"><strong>: {{ $foundStudent->tempat_lahir }}, {{ $foundStudent->tanggal_lahir->format('d-m-Y') }}</strong></span></p>
-                                            <p class="student-info"><span class="info-label">Jenis Kelamin</span> <span class="info-value"><strong>: {{ $foundStudent->jenis_kelamin }}</strong></span></p>
-                                            <p class="student-info"><span class="info-label">Kelas</span> <span class="info-value"><strong>: {{ $foundStudent->kelas }}</strong></span></p>
+                                            <div class="student-profile-wrapper" style="display: flex; gap: 25px; justify-content: space-between; align-items: center; margin: 20px 0; flex-wrap: wrap;">
+                                                <div class="student-details-list" style="flex-grow: 1; min-width: 250px;">
+                                                    <p class="student-info"><span class="info-label">Nomor Peserta</span> <span class="info-value"><strong>: {{ $foundStudent->nomor_peserta }}</strong></span></p>
+                                                    <p class="student-info"><span class="info-label">NISN</span> <span class="info-value"><strong>: {{ $foundStudent->nisn }}</strong></span></p>
+                                                    <p class="student-info"><span class="info-label">TTL</span> <span class="info-value"><strong>: {{ $foundStudent->tempat_lahir }}, {{ $foundStudent->tanggal_lahir->format('d-m-Y') }}</strong></span></p>
+                                                    <p class="student-info"><span class="info-label">Jenis Kelamin</span> <span class="info-value"><strong>: {{ $foundStudent->jenis_kelamin }}</strong></span></p>
+                                                    <p class="student-info"><span class="info-label">Kelas</span> <span class="info-value"><strong>: {{ $foundStudent->kelas }}</strong></span></p>
+                                                </div>
+                                                
+                                                @if($foundStudent->foto)
+                                                    <div class="student-photo-container" style="position: relative; width: 120px; height: 160px; margin: 15px auto 10px auto; flex-shrink: 0; border: 4px solid #fff; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.12); background-color: #f8fafc; overflow: visible;">
+                                                        <!-- Topi Toga Overlay SVG -->
+                                                        <div class="toga-cap" style="position: absolute; top: -24px; left: 50%; transform: translateX(-50%) rotate(-6deg); width: 85px; height: auto; z-index: 10; pointer-events: none; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
+                                                            <svg viewBox="0 0 512 512" style="width: 100%; height: auto; display: block;">
+                                                                <!-- Cap Skull -->
+                                                                <path d="M140,180 c0,0 20,80 116,80 s116,-80 116,-80 v50 c0,40 -40,70 -116,70 s-116,-30 -116,-70 z" fill="#1e293b" />
+                                                                <path d="M150,225 c0,0 30,35 106,35 s106,-35 106,-35 v10 c0,25 -30,45 -106,45 s-106,-20 -106,-45 z" fill="#0f172a" />
+                                                                <!-- Cap Diamond/Board -->
+                                                                <polygon points="256,60 480,140 256,220 32,140" fill="#2d3748" stroke="#1a202c" stroke-width="4" />
+                                                                <polygon points="256,75 440,140 256,205 72,140" fill="#1a202c" />
+                                                                <!-- Button on Top -->
+                                                                <ellipse cx="256" cy="140" rx="12" ry="7" fill="#4a5568" />
+                                                                <!-- Tassel / Tali Toga -->
+                                                                <path d="M256,140 C280,145 375,180 375,220" fill="none" stroke="#ecc94b" stroke-width="5" stroke-linecap="round" />
+                                                                <!-- Tassel Brush -->
+                                                                <polygon points="370,220 380,220 385,260 365,260" fill="#ecc94b" />
+                                                                <rect x="368" y="217" width="14" height="6" rx="2" fill="#d69e2e" />
+                                                            </svg>
+                                                        </div>
+                                                        <!-- Foto Siswa -->
+                                                        @php
+                                                            $photoUrl = (file_exists(public_path(ltrim($foundStudent->foto, '/'))) || strpos($foundStudent->foto, 'http') === 0) ? asset(ltrim($foundStudent->foto, '/')) : asset('storage/' . ltrim($foundStudent->foto, '/'));
+                                                        @endphp
+                                                        <img src="{{ $photoUrl }}" alt="Foto {{ $foundStudent->nama }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;">
+                                                    </div>
+                                                @endif
+                                            </div>
                                             
                                             <p class="status-text" style="font-weight: normal;"><strong>Anda dinyatakan <span style="color:var(--success-color);">LULUS</span></strong> berdasarkan Surat Keterangan Lulus nomor : <strong>{{ $foundStudent->nomor_skl }}</strong> tanggal {{ \Carbon\Carbon::parse($activeYear->target_date)->locale('id')->translatedFormat('d F Y') }}</p>
                                             <p class="message-success">Kami bangga dengan pencapaian Anda! Teruslah belajar, raih cita-cita, dan jaga nama baik almamater.<br>Rayakan rasa syukur Anda secara positif dengan berbagi kebahagiaan mengisi kesan dan pesan di bawah!</p>
