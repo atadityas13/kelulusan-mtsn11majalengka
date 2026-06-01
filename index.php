@@ -1,29 +1,39 @@
 <?php
+session_start();
 date_default_timezone_set('Asia/Jakarta');
+require_once 'db.php';
+
+// Ambil pengaturan dinamis dari database
+$currentSettings = [];
+try {
+    $stmtSet = $pdo->query("SELECT * FROM settings");
+    while ($row = $stmtSet->fetch()) {
+        $currentSettings[$row['setting_key']] = $row['setting_value'];
+    }
+} catch (PDOException $e) {
+    // Fallback jika database bermasalah
+}
+
+$targetDate = $currentSettings['target_date'] ?? '2025-06-02 15:00:00';
+$maintenanceMode = $currentSettings['maintenance_mode'] ?? '0';
+
+$currentTime = date('Y-m-d H:i:s'); // Waktu saat ini di server
+
+// Tentukan apakah waktu pengumuman sudah tiba dan tidak sedang dalam mode pemeliharaan
+$showResult = (strtotime($currentTime) >= strtotime($targetDate)) && ($maintenanceMode !== '1');
+
 // Pesan dari Kepala Madrasah
 $kepalaMadrasahMessage = [
     'message' => "Selamat dan sukses untuk seluruh siswa-siswi MTsN 11 Majalengka yang telah menyelesaikan pendidikan dengan baik. Teruslah berjuang meraih impian dan jadilah generasi penerus bangsa yang membanggakan. Ilmu yang kalian dapatkan semoga menjadi bekal untuk masa depan yang lebih cerah. Ingatlah selalu nilai-nilai agama dan budi pekerti luhur. Jaga nama baik almamater dan teruslah berprestasi di jenjang pendidikan berikutnya.",
-    'name' => "H. Jajang Gunawan, S.Ag.,M.Pd.I.", // Ganti dengan nama Kepala Madrasah yang sebenarnya
+    'name' => "H. Jajang Gunawan, S.Ag.,M.Pd.I.", 
     'position' => "Kepala Madrasah MTsN 11 Majalengka"
 ];
-
-// Waktu target pengumuman kelulusan (2 Juni 2025, 15:00 WIB)
-$targetDate = '2025-06-02 15:00:00';
-$currentTime = date('Y-m-d H:i:s'); // Waktu saat ini di server
-
-// Tentukan apakah waktu pengumuman sudah tiba
-// Jika waktu saat ini sudah melewati atau sama dengan waktu target, tampilkan formulir/hasil kelulusan
-// Jika belum, tampilkan hitung mundur
-$showResult = (strtotime($currentTime) >= strtotime($targetDate));
 
 // Inisialisasi variabel untuk penanganan form
 $foundStudent = null;
 $isGraduated = false;
 $errorMessage = '';
 $sklDownloadError = ''; // Variabel untuk pesan error SKL
-
-// Ganti file JSON utama menjadi file batch release
-$jsonFile = 'data_kelulusan_with_release_time.json';
 
 // Logika penanganan form hanya jika waktu pengumuman sudah tiba
 if ($_SERVER["REQUEST_METHOD"] == "POST" && $showResult) {
@@ -38,80 +48,73 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $showResult) {
     $batchReleaseNotYet = false;
     $batchReleaseTime = '';
 
-    if (file_exists($jsonFile)) {
-        $jsonData = file_get_contents($jsonFile);
-        $students = json_decode($jsonData, true);
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM students WHERE nomor_peserta = ? AND nisn = ? AND tanggal_lahir = ?");
+        $stmt->execute([$nomorPesertaInput, $nisnInput, $tanggalLahirInput]);
+        $foundStudent = $stmt->fetch();
 
-        if (is_array($students)) {
-            foreach ($students as $student) {
-                if ($student['nomor_peserta'] == $nomorPesertaInput &&
-                    (string)$student['nisn'] == $nisnInput &&
-                    $student['tanggal_lahir'] == $tanggalLahirInput) {
-                    $foundStudent = $student;
-                    $isGraduated = ($student['status_kelulusan'] == 'Lulus');
-                    // Cek batch release
-                    $batchReleaseTime = $student['release_timestamp'] ?? null;
-                    if ($batchReleaseTime && strtotime($currentTime) < strtotime($batchReleaseTime)) {
-                        $batchReleaseNotYet = true;
-                    }
-                    break;
-                }
+        if ($foundStudent) {
+            $isGraduated = ($foundStudent['status_kelulusan'] == 'Lulus');
+            // Cek batch release
+            $batchReleaseTime = $foundStudent['release_timestamp'] ?? null;
+            if ($batchReleaseTime && strtotime($currentTime) < strtotime($batchReleaseTime)) {
+                $batchReleaseNotYet = true;
             }
         } else {
-            $errorMessage = "Error: Data siswa tidak valid atau kosong.";
+            $errorMessage = "Maaf, kombinasi Nomor Peserta, NISN, dan Tanggal Lahir yang Anda masukkan tidak ditemukan dalam data kami.";
         }
-    } else {
-        $errorMessage = "Error: File data_kelulusan_with_release_time.json tidak ditemukan.";
-    }
-
-    if ($foundStudent === null && empty($errorMessage)) {
-        $errorMessage = "Maaf, kombinasi Nomor Peserta, NISN, dan Tanggal Lahir yang Anda masukkan tidak ditemukan dalam data kami.";
+    } catch (PDOException $e) {
+        $errorMessage = "Terjadi kesalahan sistem database. Silakan coba beberapa saat lagi.";
     }
 } elseif ($_SERVER["REQUEST_METHOD"] == "POST" && !$showResult) {
-    // Jika form disubmit sebelum waktu target
-    $errorMessage = "Pengumuman kelulusan baru akan dibuka pada " . date('d F Y', strtotime($targetDate)) . " pukul " . date('H:i', strtotime($targetDate)) . " WIB. Mohon ditunggu.";
+    if ($maintenanceMode === '1') {
+        $errorMessage = "Sistem pengecekan kelulusan sedang dalam pemeliharaan (maintenance mode). Mohon ditunggu.";
+    } else {
+        $errorMessage = "Pengumuman kelulusan baru akan dibuka pada " . date('d F Y', strtotime($targetDate)) . " pukul " . date('H:i', strtotime($targetDate)) . " WIB. Mohon ditunggu.";
+    }
     // Pastikan $showResult tetap false agar hitung mundur tetap terlihat
     $showResult = false;
 }
 
-// Membaca pesan guru (akan selalu ditampilkan di sidebar)
+// Membaca pesan guru (selalu ditampilkan di sidebar) dari database
 $teacherMessages = [];
-$jsonFileTeacherMessages = 'teacher_messages.json';
-if (file_exists($jsonFileTeacherMessages)) {
-    $jsonDataTeacherMessages = file_get_contents($jsonFileTeacherMessages);
-    $teacherMessages = json_decode($jsonDataTeacherMessages, true);
-    if (!is_array($teacherMessages)) {
-        $teacherMessages = [];
+try {
+    $stmtMsg = $pdo->query("SELECT * FROM teacher_messages ORDER BY date DESC");
+    $teacherMessages = $stmtMsg->fetchAll();
+    
+    // Muat komentar untuk masing-masing pesan guru
+    foreach ($teacherMessages as $key => $msg) {
+        $stmtComm = $pdo->prepare("SELECT * FROM comments WHERE item_uid = ? AND item_type = 'teacher_message' AND status = 'approved' ORDER BY date ASC");
+        $stmtComm->execute([$msg['uid']]);
+        $teacherMessages[$key]['comments'] = $stmtComm->fetchAll();
     }
-    // Urutkan pesan berdasarkan tanggal terbaru
-    usort($teacherMessages, function($a, $b) {
-        return strtotime($b['date']) - strtotime($a['date']);
-    });
+} catch (PDOException $e) {
+    // Fallback
 }
 
-// Membaca dan menampilkan testimoni terbaru (akan selalu ditampilkan di sidebar)
+// Membaca testimoni siswa (hanya yang sudah disetujui / approved) dari database
 $testimonials = [];
-$testimonialFile = 'testimonials.json';
-if (file_exists($testimonialFile)) {
-    $testimonials = json_decode(file_get_contents($testimonialFile), true);
-    if (!is_array($testimonials)) {
-        $testimonials = [];
+try {
+    $stmtTesti = $pdo->query("SELECT * FROM testimonials WHERE status = 'approved' ORDER BY date DESC");
+    $testimonials = $stmtTesti->fetchAll();
+    
+    // Muat komentar untuk masing-masing testimoni
+    foreach ($testimonials as $key => $t) {
+        $stmtComm = $pdo->prepare("SELECT * FROM comments WHERE item_uid = ? AND item_type = 'testimonial' AND status = 'approved' ORDER BY date ASC");
+        $stmtComm->execute([$t['uid']]);
+        $testimonials[$key]['comments'] = $stmtComm->fetchAll();
     }
-    // Urutkan testimoni berdasarkan tanggal terbaru
-    usort($testimonials, function($a, $b) {
-        return strtotime($b['date']) - strtotime($a['date']);
-    });
+} catch (PDOException $e) {
+    // Fallback
 }
 
-// Membaca dan menampilkan riwayat pengecekan terbaru (akan selalu ditampilkan di sidebar)
+// Membaca riwayat pengecekan terbaru dari database
 $checkHistory = [];
-$historyFile = 'check_history.json';
-if (file_exists($historyFile)) {
-    $checkHistory = json_decode(file_get_contents($historyFile), true);
-    if (!is_array($checkHistory)) {
-        $checkHistory = [];
-    }
-    // Riwayat sudah diurutkan (terbaru di atas) saat disimpan, jadi tidak perlu usort lagi
+try {
+    $stmtHist = $pdo->query("SELECT * FROM check_history ORDER BY id DESC LIMIT 5");
+    $checkHistory = $stmtHist->fetchAll();
+} catch (PDOException $e) {
+    // Fallback
 }
 ?>
 <!DOCTYPE html>
@@ -981,7 +984,7 @@ if (file_exists($historyFile)) {
                 });
             }
 
-            // AJAX Cek Nomor Peserta (ambil dari data_kelulusan_with_release_time.json)
+            // AJAX Cek Nomor Peserta (Ambil secara aman dari lookup.php)
             var formCekNopes = document.getElementById('form-cek-nopes');
             if (formCekNopes) {
                 formCekNopes.addEventListener('submit', function(e) {
@@ -992,51 +995,43 @@ if (file_exists($historyFile)) {
                     var error = document.getElementById('modal-nopes-error');
                     result.textContent = '';
                     error.textContent = '';
-                    fetch('data_kelulusan_with_release_time.json')
+                    fetch('lookup.php?action=cek_nopes&nisn=' + encodeURIComponent(nisn) + '&tanggal_lahir=' + encodeURIComponent(tgl))
                         .then(res => res.json())
                         .then(data => {
-                            var found = data.find(s =>
-                                String(s.nisn) === nisn &&
-                                s.tanggal_lahir === tgl
-                            );
-                            if (found) {
-                                result.textContent = "Nomor Peserta Anda: " + found.nomor_peserta;
+                            if (data.success) {
+                                result.textContent = "Nomor Peserta Anda: " + data.nomor_peserta;
                             } else {
-                                error.textContent = "Data tidak ditemukan. Pastikan NISN dan tanggal lahir benar.";
+                                error.textContent = data.message;
                             }
                         })
                         .catch(() => {
-                            error.textContent = "Gagal membaca data.";
+                            error.textContent = "Gagal menghubungi server pencarian.";
                         });
                 });
             }
 
-            // AJAX Cek NISN (ambil dari data_kelulusan_with_release_time.json)
+            // AJAX Cek NISN (Ambil secara aman dari lookup.php)
             var formCekNisn = document.getElementById('form-cek-nisn');
             if (formCekNisn) {
                 formCekNisn.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    var nama = document.getElementById('nisn-nama').value.trim().toUpperCase();
+                    var nama = document.getElementById('nisn-nama').value.trim();
                     var tgl = document.getElementById('nisn-tgl').value.trim();
                     var result = document.getElementById('modal-nisn-result');
                     var error = document.getElementById('modal-nisn-error');
                     result.textContent = '';
                     error.textContent = '';
-                    fetch('data_kelulusan_with_release_time.json')
+                    fetch('lookup.php?action=cek_nisn&nama=' + encodeURIComponent(nama) + '&tanggal_lahir=' + encodeURIComponent(tgl))
                         .then(res => res.json())
                         .then(data => {
-                            var found = data.find(s =>
-                                s.nama.toUpperCase() === nama &&
-                                s.tanggal_lahir === tgl
-                            );
-                            if (found) {
-                                result.textContent = "NISN Anda: " + found.nisn;
+                            if (data.success) {
+                                result.textContent = "NISN Anda: " + data.nisn;
                             } else {
-                                error.textContent = "Data tidak ditemukan. Pastikan nama lengkap dan tanggal lahir benar.";
+                                error.textContent = data.message;
                             }
                         })
                         .catch(() => {
-                            error.textContent = "Gagal membaca data.";
+                            error.textContent = "Gagal menghubungi server pencarian.";
                         });
                 });
             }
