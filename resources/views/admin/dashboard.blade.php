@@ -199,7 +199,7 @@
             <div>
                 <h1>
                     @if($activeTab === 'overview') Ringkasan & Statistik
-                    @elseif($activeTab === 'students') Manajemen Data Roster Siswa
+                    @elseif($activeTab === 'students') Manajemen Data Siswa Lulusan
                     @elseif($activeTab === 'testimonials') Moderasi Kesan & Pesan
                     @elseif($activeTab === 'teacher_messages') Kelola Pesan Guru
                     @elseif($activeTab === 'history') Log Riwayat Pengecekan
@@ -234,7 +234,7 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3>Total Roster</h3>
+                        <h3>Total Siswa Lulusan</h3>
                         <p>{{ $statTotalStudents }}</p>
                     </div>
                     <div class="stat-icon stat-icon-blue"><i class="fa-solid fa-users"></i></div>
@@ -401,7 +401,7 @@
                         </table>
                     </div>
 
-                    <!-- Paginasi Roster Siswa -->
+                    <!-- Paginasi Siswa Lulusan -->
                     @if($studentsList->hasPages())
                         <div class="card-body" style="padding: 0 24px 24px 24px;">
                             <div class="pagination-container">
@@ -414,7 +414,7 @@
                     @endif
                 @else
                     <div class="card-body" style="text-align:center; color: #888;">
-                        <p>Silakan buat Tahun Ajaran terlebih dahulu di menu <strong>Pengaturan</strong> sebelum mengelola data roster kelulusan.</p>
+                        <p>Silakan buat Tahun Ajaran terlebih dahulu di menu <strong>Pengaturan</strong> sebelum mengelola data Siswa Lulusan.</p>
                     </div>
                 @endif
             </div>
@@ -427,7 +427,7 @@
                             @csrf
                             <input type="hidden" name="academic_year_id" value="{{ $selectedYearId }}">
                             <div class="modal-header">
-                                <h3>Import Roster Siswa Massal (JSON) - TA {{ $selectedYear->year }}</h3>
+                                <h3>Import Siswa Lulusan Massal (JSON) - TA {{ $selectedYear->year }}</h3>
                                 <button type="button" class="modal-close" onclick="closeModal('importModal')">&times;</button>
                             </div>
                             <div class="modal-body">
@@ -435,7 +435,7 @@
                                     Silakan unggah berkas JSON data kelulusan. Sistem otomatis memasukkan data baru dan mengabaikan data duplikat berdasarkan NISN/Nomor Peserta.
                                 </p>
                                 <div class="form-group-db">
-                                    <label for="json_file">Pilih Berkas JSON Data Roster Siswa</label>
+                                    <label for="json_file">Pilih Berkas JSON Data Siswa Lulusan</label>
                                     <input type="file" id="json_file" name="json_file" class="form-control" accept=".json" required>
                                 </div>
                             </div>
@@ -456,7 +456,7 @@
                             <input type="hidden" name="id" id="studentId" value="">
                             
                             <div class="modal-header">
-                                <h3 id="studentModalTitle">Tambah Data Roster Siswa</h3>
+                                <h3 id="studentModalTitle">Tambah Data Siswa Lulusan</h3>
                                 <button type="button" class="modal-close" onclick="closeModal('studentFormModal')">&times;</button>
                             </div>
                             <div class="modal-body">
@@ -519,7 +519,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" onclick="closeModal('studentFormModal')">Batal</button>
-                                <button type="submit" class="btn btn-primary" id="studentFormSubmitBtn">Simpan Roster</button>
+                                <button type="submit" class="btn btn-primary" id="studentFormSubmitBtn">Simpan Siswa Lulusan</button>
                             </div>
                         </form>
                     </div>
@@ -530,8 +530,8 @@
                         document.getElementById('studentForm').reset();
                         document.getElementById('studentForm').action = "{{ route('admin.student.add') }}";
                         document.getElementById('studentId').value = '';
-                        document.getElementById('studentModalTitle').innerText = 'Tambah Roster Siswa';
-                        document.getElementById('studentFormSubmitBtn').innerText = 'Simpan Roster';
+                        document.getElementById('studentModalTitle').innerText = 'Tambah Siswa Lulusan';
+                        document.getElementById('studentFormSubmitBtn').innerText = 'Simpan Siswa Lulusan';
                         openModal('studentFormModal');
                     }
 
@@ -540,8 +540,8 @@
                         // Ganti action URL form dinamis
                         document.getElementById('studentForm').action = "/admin/students/edit/" + student.id;
                         document.getElementById('studentId').value = student.id;
-                        document.getElementById('studentModalTitle').innerText = 'Edit Roster Siswa';
-                        document.getElementById('studentFormSubmitBtn').innerText = 'Perbarui Roster';
+                        document.getElementById('studentModalTitle').innerText = 'Edit Siswa Lulusan';
+                        document.getElementById('studentFormSubmitBtn').innerText = 'Perbarui Siswa Lulusan';
 
                         document.getElementById('nomor_peserta').value = student.nomor_peserta;
                         document.getElementById('nisn').value = student.nisn;
