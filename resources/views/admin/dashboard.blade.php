@@ -440,7 +440,7 @@
                                             <td>{{ $no++ }}</td>
                                             <td style="text-align: center;">
                                                 @if($student->foto)
-                                                    <img src="{{ asset($student->foto) }}" alt="Foto {{ $student->nama }}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                                     <img src="{{ (strpos($student->foto, 'storage/') === 0 || strpos($student->foto, 'http') === 0) ? asset($student->foto) : asset('storage/' . ltrim($student->foto, '/')) }}" alt="Foto {{ $student->nama }}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px;">
                                                 @else
                                                     <span style="color: #ccc; font-size: 0.9em;">-</span>
                                                 @endif
