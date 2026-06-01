@@ -867,6 +867,27 @@ class AdminController extends Controller
         $zip = new ZipArchive();
 
         if ($zip->open($path) === true) {
+            // Load shared strings if available
+            $sharedStrings = [];
+            if (($sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml')) !== false) {
+                $ssXml = simplexml_load_string($sharedStringsXml);
+                if ($ssXml && isset($ssXml->si)) {
+                    foreach ($ssXml->si as $si) {
+                        if (isset($si->t)) {
+                            $sharedStrings[] = (string) $si->t;
+                        } elseif (isset($si->r)) {
+                            $text = '';
+                            foreach ($si->r as $r) {
+                                $text .= (string) $r->t;
+                            }
+                            $sharedStrings[] = $text;
+                        } else {
+                            $sharedStrings[] = '';
+                        }
+                    }
+                }
+            }
+
             if (($sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml')) === false) {
                 $zip->close();
                 return [];
@@ -886,6 +907,13 @@ class AdminController extends Controller
                     $colIdx = $this->excelColumnIndex($colLetter);
                     
                     $cellValue = (string) $cell->v;
+                    $tAttr = (string) $cell['t'];
+
+                    // Look up shared strings
+                    if ($tAttr === 's' && $cellValue !== '' && isset($sharedStrings[(int)$cellValue])) {
+                        $cellValue = $sharedStrings[(int)$cellValue];
+                    }
+                    
                     $values[$colIdx] = $cellValue;
                 }
 
