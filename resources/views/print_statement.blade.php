@@ -36,7 +36,7 @@
         /* Kop Surat atau Judul Dokumen */
         .letter-header {
             text-align: center;
-            margin-bottom: 17px;
+            margin-bottom: 20px;
         }
 
         .letter-title {
