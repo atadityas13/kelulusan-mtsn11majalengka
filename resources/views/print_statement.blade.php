@@ -62,12 +62,12 @@
             width: 100%;
             margin: 8px 0 10px 25px;
             border-collapse: collapse;
-            margin-bottom: 3px;
         }
 
         .student-details-table td {
             padding: 1px 6px;
             vertical-align: top;
+            margin-bottom: 3px;
         }
 
         .student-details-table td.label-col {
