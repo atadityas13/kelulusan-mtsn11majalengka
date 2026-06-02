@@ -29,11 +29,12 @@
 
     /* Confetti */
     #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: none; }
+    .btn-print-statement:hover { background-color: #059669 !important; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 </style>
 @endsection
 
 @section('content')
-    @if($foundStudent && !$batchReleaseNotYet)
+    @if($foundStudent && !$batchReleaseNotYet && empty($foundStudent->signature))
     <!-- Modal Himbauan Karakter -->
     <div class="modal-warning-overlay" id="modal-warning-overlay" style="display:flex;">
         <div class="modal-warning">
@@ -298,6 +299,12 @@
                                             @else
                                                 <span class="btn-download disabled">Unduh Surat Keterangan Lulus (PDF)</span>
                                                 <p class="download-notice">Berkas SKL PDF Anda belum diterbitkan oleh Admin. Silakan cek kembali nanti atau hubungi madrasah.</p>
+                                            @endif
+
+                                            @if(!empty($foundStudent->signature))
+                                                <a href="{{ route('print.statement', ['nomor_peserta' => $foundStudent->nomor_peserta, 'nisn' => $foundStudent->nisn, 'tanggal_lahir' => $foundStudent->tanggal_lahir->format('Y-m-d')]) }}" target="_blank" class="btn-print-statement" style="display: block; width: 100%; max-width: 90%; margin: 15px auto 25px auto; padding: 15px 25px; font-size: 1.1em; font-weight: 600; text-align: center; color: white; background-color: #10b981; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; text-decoration: none; box-sizing: border-box; position: relative;">
+                                                    <i class="fa-solid fa-print"></i> Cetak Surat Pernyataan Siswa
+                                                </a>
                                             @endif
                                             
                                             <p class="info-download-skL">Surat Keterangan Lulus (fisik asli) dapat diambil di Madrasah pada jam kerja.</p>
@@ -669,6 +676,7 @@
                     
                     if (data.success) {
                         modal.style.display = 'none';
+                        window.location.reload();
                     } else {
                         alert('Gagal menyimpan tanda tangan: ' + data.message);
                         btn.disabled = false;

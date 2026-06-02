@@ -17,6 +17,7 @@ use App\Http\Controllers\InteractionController;
 Route::match(['get', 'post'], '/', [HomeController::class, 'index'])->name('home');
 Route::get('/lookup/nopes', [HomeController::class, 'lookupNopes'])->name('lookup.nopes');
 Route::get('/lookup/nisn', [HomeController::class, 'lookupNisn'])->name('lookup.nisn');
+Route::get('/print-statement', [HomeController::class, 'printStatement'])->name('print.statement');
 
 // ========================================================
 // 2. RUTE INTERAKSI SOSIAL (AJAX)

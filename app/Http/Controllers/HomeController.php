@@ -171,5 +171,37 @@ class HomeController extends Controller
 
         return response()->json(['success' => false, 'message' => 'Data tidak ditemukan. Pastikan nama lengkap dan tanggal lahir benar.']);
     }
+
+    /**
+     * Cetak Surat Pernyataan Siswa
+     */
+    public function printStatement(Request $request)
+    {
+        $activeYear = AcademicYear::where('is_active', true)->first();
+        if (!$activeYear) {
+            abort(503, 'Sistem tidak aktif.');
+        }
+
+        $nomorPeserta = trim($request->query('nomor_peserta', ''));
+        $nisn = trim($request->query('nisn', ''));
+        $tanggalLahir = trim($request->query('tanggal_lahir', ''));
+
+        if (empty($nomorPeserta) || empty($nisn) || empty($tanggalLahir)) {
+            abort(400, 'Parameter tidak lengkap.');
+        }
+
+        $student = Student::where('academic_year_id', $activeYear->id)
+            ->where('nomor_peserta', $nomorPeserta)
+            ->where('nisn', $nisn)
+            ->where('tanggal_lahir', $tanggalLahir)
+            ->first();
+
+        if (!$student) {
+            abort(404, 'Siswa tidak ditemukan.');
+        }
+
+        return view('print_statement', compact('student', 'activeYear'));
+    }
 }
 ?>
+
