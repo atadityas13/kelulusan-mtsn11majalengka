@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Surat Pernyataan Kelulusan - {{ $student->nama }}</title>
     <link rel="icon" type="image/png" href="{{ asset('assets/favicon.png') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Gaya Global & Reset */
         body {
@@ -25,7 +27,7 @@
             padding: 20mm 20mm 20mm 20mm;
             margin: 20px auto;
             background: #fff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
             position: relative;
             border-radius: 4px;
@@ -98,7 +100,7 @@
             float: right;
             width: 260px;
             text-align: center;
-            margin-top: 3px;
+            margin-top: 7px;
             position: relative;
         }
 
@@ -139,7 +141,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -219,6 +221,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- Floating Navigation Bar (Hidden during printing) -->
@@ -239,7 +242,7 @@
 
     <!-- Halaman Dokumen A4 -->
     <div class="page-container">
-        
+
         <div class="letter-header">
             <h1 class="letter-title">SURAT PERNYATAAN</h1>
         </div>
@@ -266,7 +269,8 @@
                 <tr>
                     <td class="label-col">Tempat, Tanggal Lahir</td>
                     <td class="colon-col">:</td>
-                    <td>{{ $student->tempat_lahir ?? '-' }}, {{ $student->tanggal_lahir ? $student->tanggal_lahir->translatedFormat('d F Y') : '-' }}</td>
+                    <td>{{ $student->tempat_lahir ?? '-' }},
+                        {{ $student->tanggal_lahir ? $student->tanggal_lahir->translatedFormat('d F Y') : '-' }}</td>
                 </tr>
                 <tr>
                     <td class="label-col">Kelas</td>
@@ -275,43 +279,58 @@
                 </tr>
             </table>
 
-            <p class="section-intro">Dengan ini menyatakan dengan sebenar-benarnya dan penuh kesadaran bahwa sehubungan dengan pelaksanaan Pengumuman Kelulusan Siswa Tahun Pelajaran {{ $activeYear->year }} tanggal {{ \Carbon\Carbon::parse($activeYear->target_date)->locale('id')->translatedFormat('d F Y') }}, saya berkomitmen untuk:</p>
+            <p class="section-intro">Dengan ini menyatakan dengan sebenar-benarnya dan penuh kesadaran bahwa sehubungan
+                dengan pelaksanaan Pengumuman Kelulusan Siswa Tahun Pelajaran {{ $activeYear->year }} tanggal
+                {{ \Carbon\Carbon::parse($activeYear->target_date)->locale('id')->translatedFormat('d F Y') }}, saya
+                berkomitmen untuk:</p>
 
             <ol class="statement-points">
                 <li>
-                    <strong>Menjaga Nilai-Nilai Akhlakul Karimah</strong> dengan senantiasa bersyukur atas kelulusan yang diperoleh secara khidmat dan tidak berlebihan.
+                    <strong>Menjaga Nilai-Nilai Akhlakul Karimah</strong> dengan senantiasa bersyukur atas kelulusan
+                    yang diperoleh secara khidmat dan tidak berlebihan.
                 </li>
                 <li>
-                    <strong>Menjaga Ketertiban dan Keamanan Umum</strong> dengan tidak melibatkan diri dalam aksi konvoi kendaraan, hura-hura, maupun kerumunan massa yang bertujuan merayakan kelulusan secara destruktif.
+                    <strong>Menjaga Ketertiban dan Keamanan Umum</strong> dengan tidak melibatkan diri dalam aksi konvoi
+                    kendaraan, hura-hura, maupun kerumunan massa yang bertujuan merayakan kelulusan secara destruktif.
                 </li>
                 <li>
-                    <strong>Menjaga Kebersihan dan Kelayakan Atribut Madrasah</strong> dengan tidak melakukan aksi corat-coret pada pakaian seragam sekolah, atribut, maupun media lainnya.
+                    <strong>Menjaga Kebersihan dan Kelayakan Atribut Madrasah</strong> dengan tidak melakukan aksi
+                    corat-coret pada pakaian seragam sekolah, atribut, maupun media lainnya.
                 </li>
                 <li>
-                    <strong>Menolak Segala Bentuk Vandalisme</strong> dengan tidak melakukan perusakan, pencoretan, atau pengotoran terhadap fasilitas umum maupun fasilitas madrasah.
+                    <strong>Menolak Segala Bentuk Vandalisme</strong> dengan tidak melakukan perusakan, pencoretan, atau
+                    pengotoran terhadap fasilitas umum maupun fasilitas madrasah.
                 </li>
             </ol>
 
-            <p class="section-intro">Apabila di kemudian hari saya terbukti melakukan pelanggaran terhadap poin-poin pernyataan di atas, maka saya menyatakan siap dan bersedia menerima sanksi tegas sesuai dengan ketentuan yang berlaku di MTsN 11 Majalengka, berupa:</p>
+            <p class="section-intro">Apabila di kemudian hari saya terbukti melakukan pelanggaran terhadap poin-poin
+                pernyataan di atas, maka saya menyatakan siap dan bersedia menerima sanksi tegas sesuai dengan ketentuan
+                yang berlaku di MTsN 11 Majalengka, berupa:</p>
 
             <ol class="statement-points" style="list-style-type: lower-alpha; padding-left: 20px; margin-bottom: 25px;">
-                <li style="list-style-type: lower-alpha; margin-bottom: 8px;">Pembatalan status kelulusan karena dianggap melanggar standar nilai kelayakan akhlak yang baik (minimal B);</li>
-                <li style="list-style-type: lower-alpha; margin-bottom: 8px;">Penundaan atau pembatalan proses pendaftaran ke jenjang sekolah menengah atas, serta penonaktifan akun SPMB yang bersangkutan;</li>
-                <li style="list-style-type: lower-alpha; margin-bottom: 8px;">Penahanan dokumen ijazah oleh pihak madrasah.</li>
+                <li style="list-style-type: lower-alpha; margin-bottom: 8px;">Pembatalan status kelulusan karena
+                    dianggap melanggar standar nilai kelayakan akhlak yang baik (minimal B);</li>
+                <li style="list-style-type: lower-alpha; margin-bottom: 8px;">Penundaan atau pembatalan proses
+                    pendaftaran ke jenjang sekolah menengah atas, serta penonaktifan akun SPMB yang bersangkutan;</li>
+                <li style="list-style-type: lower-alpha; margin-bottom: 8px;">Penahanan dokumen ijazah oleh pihak
+                    madrasah.</li>
             </ol>
 
             <p class="letter-footer-text">
-                Demikian surat pernyataan ini saya buat dengan sungguh-sungguh, dalam keadaan sehat jasmani dan rohani, serta tanpa ada paksaan atau tekanan dari pihak mana pun. Surat pernyataan ini dibuat untuk dipergunakan sebagaimana mestinya sebagai bukti komitmen kepatuhan siswa.
+                Demikian surat pernyataan ini saya buat dengan sungguh-sungguh, dalam keadaan sehat jasmani dan rohani,
+                serta tanpa ada paksaan atau tekanan dari pihak mana pun. Surat pernyataan ini dibuat untuk dipergunakan
+                sebagaimana mestinya sebagai bukti komitmen kepatuhan siswa.
             </p>
 
 
             <!-- Blok Tanda Tangan -->
             <div class="signature-block">
                 <div class="signature-date">
-                    Cingambul, {{ \Carbon\Carbon::parse($activeYear->target_date)->locale('id')->translatedFormat('d F Y') }}
+                    Cingambul,
+                    {{ \Carbon\Carbon::parse($activeYear->target_date)->locale('id')->translatedFormat('d F Y') }}
                 </div>
                 <div style="margin-bottom: 50px;">Yang Membuat Pernyataan,</div>
-                
+
                 <div class="signature-wrapper">
                     @if($student->signature)
                         <img src="{{ $student->signature }}" alt="Tanda Tangan Siswa" class="signature-image">
@@ -321,7 +340,7 @@
                 <div class="student-name-underline">{{ $student->nama }}</div>
                 <div>NISN. {{ $student->nisn }}</div>
             </div>
-            
+
             <div style="clear: both;"></div>
 
         </div>
@@ -338,4 +357,5 @@
         });
     </script>
 </body>
+
 </html>
