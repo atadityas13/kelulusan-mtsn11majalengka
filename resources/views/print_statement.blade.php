@@ -98,7 +98,7 @@
         /* Blok Tanda Tangan & Tanggal */
         .signature-block {
             float: right;
-            text-align: center;
+            text-align: left;
             margin-top: 7px;
             position: relative;
             display: inline-block;
@@ -111,14 +111,13 @@
 
         .signature-wrapper {
             position: absolute;
-            left: 50%;
+            left: 0;
             top: 40px;
-            transform: translateX(-50%);
             z-index: 10;
             pointer-events: none;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             width: 100%;
         }
 
