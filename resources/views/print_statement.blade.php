@@ -65,9 +65,8 @@
         }
 
         .student-details-table td {
-            padding: 1px 6px;
+            padding: 3px 6px;
             vertical-align: top;
-            margin-bottom: 3px;
         }
 
         .student-details-table td.label-col {
@@ -257,19 +256,16 @@
                     <td class="colon-col">:</td>
                     <td><strong>{{ $student->nama }}</strong></td>
                 </tr>
-                <br>
                 <tr>
                     <td class="label-col">Nomor Peserta AM</td>
                     <td class="colon-col">:</td>
                     <td>{{ $student->nomor_peserta }}</td>
                 </tr>
-                <br>
                 <tr>
                     <td class="label-col">NISN</td>
                     <td class="colon-col">:</td>
                     <td>{{ $student->nisn }}</td>
                 </tr>
-                <br>
                 <tr>
                     <td class="label-col">Tempat, Tanggal Lahir</td>
                     <td class="colon-col">:</td>
@@ -277,7 +273,6 @@
                         {{ $student->tanggal_lahir ? $student->tanggal_lahir->translatedFormat('d F Y') : '-' }}
                     </td>
                 </tr>
-                <br>
                 <tr>
                     <td class="label-col">Kelas</td>
                     <td class="colon-col">:</td>
