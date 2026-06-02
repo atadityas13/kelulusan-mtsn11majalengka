@@ -275,6 +275,11 @@
                     </td>
                 </tr>
                 <tr>
+                    <td class="label-col">Jenis Kelamin</td>
+                    <td class="colon-col">:</td>
+                    <td>{{ $student->jenis_kelamin ?? '-' }}</td>
+                </tr>
+                <tr>
                     <td class="label-col">Kelas</td>
                     <td class="colon-col">:</td>
                     <td>{{ $student->kelas }}</td>
