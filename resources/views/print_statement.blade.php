@@ -15,14 +15,14 @@
             margin: 0;
             padding: 0;
             line-height: 1.25;
-            font-size: 11pt;
+            font-size: 12pt;
         }
 
         /* Container untuk Tampilan Web */
         .page-container {
             width: 210mm;
             min-height: 297mm;
-            padding: 15mm 20mm 15mm 20mm;
+            padding: 20mm 20mm 20mm 20mm;
             margin: 20px auto;
             background: #fff;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -34,11 +34,11 @@
         /* Kop Surat atau Judul Dokumen */
         .letter-header {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .letter-title {
-            font-size: 14pt;
+            font-size: 16pt;
             font-weight: bold;
             text-decoration: underline;
             margin: 0;
@@ -52,18 +52,18 @@
         }
 
         .section-intro {
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         /* Tabel Detail Siswa */
         .student-details-table {
             width: 100%;
-            margin: 10px 0 15px 25px;
+            margin: 8px 0 10px 25px;
             border-collapse: collapse;
         }
 
         .student-details-table td {
-            padding: 2px 6px;
+            padding: 1px 6px;
             vertical-align: top;
         }
 
@@ -78,19 +78,19 @@
 
         /* Poin Pernyataan */
         .statement-points {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             padding-left: 20px;
         }
 
         .statement-points li {
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             text-align: justify;
             list-style-type: decimal;
             padding-left: 5px;
         }
 
         .letter-footer-text {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         /* Blok Tanda Tangan & Tanggal */
@@ -98,31 +98,37 @@
             float: right;
             width: 260px;
             text-align: center;
-            margin-top: 5px;
+            margin-top: 3px;
+            position: relative;
         }
 
         .signature-date {
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .signature-wrapper {
-            height: 70px;
+            position: absolute;
+            left: 50%;
+            top: 35px;
+            transform: translateX(-50%);
+            z-index: 10;
+            pointer-events: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 5px 0;
         }
 
         .signature-image {
             max-height: 60px;
             max-width: 200px;
             object-fit: contain;
+            opacity: 0.95;
         }
 
         .student-name-underline {
             font-weight: bold;
             text-decoration: underline;
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
         /* Floating Navigation Bar untuk Web View */
@@ -208,7 +214,7 @@
 
             @page {
                 size: A4;
-                margin: 12mm 15mm 12mm 15mm;
+                margin: 20mm;
             }
         }
     </style>
@@ -304,13 +310,11 @@
                 <div class="signature-date">
                     Cingambul, {{ \Carbon\Carbon::parse($activeYear->target_date)->locale('id')->translatedFormat('d F Y') }}
                 </div>
-                <div>Yang Membuat Pernyataan,</div>
+                <div style="margin-bottom: 50px;">Yang Membuat Pernyataan,</div>
                 
                 <div class="signature-wrapper">
                     @if($student->signature)
                         <img src="{{ $student->signature }}" alt="Tanda Tangan Siswa" class="signature-image">
-                    @else
-                        <div style="font-style: italic; color: #dc3545; font-size: 10pt;">(Belum menandatangani)</div>
                     @endif
                 </div>
 
