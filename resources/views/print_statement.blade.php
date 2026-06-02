@@ -269,23 +269,35 @@
                 </tr>
             </table>
 
-            <p class="section-intro">Dengan ini menyatakan dengan sebenar-benarnya dan penuh tanggung jawab bahwa sehubungan dengan Pengumuman Kelulusan, saya:</p>
+            <p class="section-intro">Dengan ini menyatakan dengan sebenar-benarnya dan penuh kesadaran bahwa sehubungan dengan pelaksanaan Pengumuman Kelulusan Siswa Tahun Pelajaran {{ $activeYear->year }} tanggal {{ \Carbon\Carbon::parse($activeYear->target_date)->locale('id')->translatedFormat('d F Y') }}, saya berkomitmen untuk:</p>
 
             <ol class="statement-points">
                 <li>
-                    <strong>Siap dan Sanggup Mematuhi</strong> seluruh ketentuan, tata tertib, serta imbauan resmi yang telah dikeluarkan oleh pihak madrasah dalam menyikapi pengumuman kelulusan.
+                    <strong>Menjaga Nilai-Nilai Akhlakul Karimah</strong> dengan senantiasa bersyukur atas kelulusan yang diperoleh secara khidmat dan tidak berlebihan.
                 </li>
                 <li>
-                    <strong>Berjanji dan Bersedia</strong> untuk tidak melakukan tindakan yang mengganggu ketertiban umum, seperti aksi corat-coret seragam, konvoi kendaraan, perusakan fasilitas, atau kegiatan eforia lainnya yang bertentangan dengan norma dan aturan madrasah.
+                    <strong>Menjaga Ketertiban dan Keamanan Umum</strong> dengan tidak melibatkan diri dalam aksi konvoi kendaraan, hura-hura, maupun kerumunan massa yang bertujuan merayakan kelulusan secara destruktif.
                 </li>
                 <li>
-                    <strong>Siap Menerima Sanksi</strong> tegas sesuai dengan Peraturan yang Berlaku di MTsN 11 Majalengka apabila di kemudian hari saya terbukti melakukan pelanggaran atau tidak mengindahkan imbauan yang telah ditetapkan tersebut.
+                    <strong>Menjaga Kebersihan dan Kelayakan Atribut Madrasah</strong> dengan tidak melakukan aksi corat-coret pada pakaian seragam sekolah, atribut, maupun media lainnya.
+                </li>
+                <li>
+                    <strong>Menolak Segala Bentuk Vandalisme</strong> dengan tidak melakukan perusakan, pencoretan, atau pengotoran terhadap fasilitas umum maupun fasilitas madrasah.
                 </li>
             </ol>
 
+            <p class="section-intro">Apabila di kemudian hari saya terbukti melakukan pelanggaran terhadap poin-poin pernyataan di atas, maka saya menyatakan siap dan bersedia menerima sanksi tegas sesuai dengan ketentuan yang berlaku di MTsN 11 Majalengka, berupa:</p>
+
+            <ol class="statement-points" style="list-style-type: lower-alpha; padding-left: 20px; margin-bottom: 25px;">
+                <li style="list-style-type: lower-alpha; margin-bottom: 8px;">Pembatalan status kelulusan karena dianggap melanggar standar nilai kelayakan akhlak yang baik (minimal B);</li>
+                <li style="list-style-type: lower-alpha; margin-bottom: 8px;">Penundaan atau pembatalan proses pendaftaran ke jenjang sekolah menengah atas, serta penonaktifan akun SPMB yang bersangkutan;</li>
+                <li style="list-style-type: lower-alpha; margin-bottom: 8px;">Penahanan dokumen ijazah oleh pihak madrasah.</li>
+            </ol>
+
             <p class="letter-footer-text">
-                Demikian surat pernyataan ini saya buat dengan sungguh-sungguh, dalam keadaan sehat, serta tanpa ada paksaan dari pihak mana pun.
+                Demikian surat pernyataan ini saya buat dengan sungguh-sungguh, dalam keadaan sehat jasmani dan rohani, serta tanpa ada paksaan atau tekanan dari pihak mana pun. Surat pernyataan ini dibuat untuk dipergunakan sebagaimana mestinya sebagai bukti komitmen kepatuhan siswa.
             </p>
+
 
             <!-- Blok Tanda Tangan -->
             <div class="signature-block">
