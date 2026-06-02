@@ -248,9 +248,9 @@
                     <td><strong>{{ $student->nama }}</strong></td>
                 </tr>
                 <tr>
-                    <td class="label-col">NIS</td>
+                    <td class="label-col">Nomor Peserta AM</td>
                     <td class="colon-col">:</td>
-                    <td>-</td>
+                    <td>{{ $student->nomor_peserta }}</td>
                 </tr>
                 <tr>
                     <td class="label-col">NISN</td>
@@ -303,7 +303,7 @@
                 </div>
 
                 <div class="student-name-underline">{{ $student->nama }}</div>
-                <div>Nama Jelas Siswa</div>
+                <div>NISN. {{ $student->nisn }}</div>
             </div>
             
             <div style="clear: both;"></div>

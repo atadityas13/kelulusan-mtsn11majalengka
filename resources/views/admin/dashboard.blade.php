@@ -236,6 +236,9 @@
             <li class="sidebar-menu-item {{ $activeTab === 'students' ? 'active' : '' }}">
                 <a href="?tab=students"><i class="fa-solid fa-graduation-cap"></i> <span>Data Siswa</span></a>
             </li>
+            <li class="sidebar-menu-item {{ $activeTab === 'statements' ? 'active' : '' }}">
+                <a href="?tab=statements"><i class="fa-solid fa-file-signature"></i> <span>Surat Pernyataan</span></a>
+            </li>
             <li class="sidebar-menu-item {{ $activeTab === 'testimonials' ? 'active' : '' }}">
                 <a href="?tab=testimonials"><i class="fa-solid fa-comments"></i> <span>Testimoni Siswa</span></a>
             </li>
@@ -265,6 +268,7 @@
                 <h1>
                     @if($activeTab === 'overview') Ringkasan & Statistik
                     @elseif($activeTab === 'students') Manajemen Data Siswa Lulusan
+                    @elseif($activeTab === 'statements') Manajemen Surat Pernyataan Siswa
                     @elseif($activeTab === 'testimonials') Moderasi Kesan & Pesan
                     @elseif($activeTab === 'teacher_messages') Kelola Pesan Guru
                     @elseif($activeTab === 'history') Log Riwayat Pengecekan
@@ -792,6 +796,104 @@
                     }
                 </script>
             @endif
+
+        <!-- ========================================================
+             TAB STATEMENTS: SURAT PERNYATAAN SISWA
+             ======================================================== -->
+        @elseif($activeTab === 'statements')
+            <div class="card">
+                <div class="card-header">
+                    <!-- Filter Tahun Ajaran & Pencarian -->
+                    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; flex-grow:1;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <label style="font-weight:600; font-size:0.9em; white-space:nowrap;">Tahun Ajaran:</label>
+                            <select class="form-control" style="width: 140px; padding: 8px 12px;" onchange="window.location.href='?tab=statements&year_id='+this.value">
+                                @foreach($academicYears as $year)
+                                    <option value="{{ $year->id }}" {{ $selectedYearId == $year->id ? 'selected' : '' }}>{{ $year->year }} {!! $year->is_active ? '(Aktif)' : '' !!}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <form action="" method="GET" class="search-form">
+                            <input type="hidden" name="tab" value="statements">
+                            <input type="hidden" name="year_id" value="{{ $selectedYearId }}">
+                            <input type="text" name="statement_search" class="form-control" placeholder="Cari Nama, NISN, Kelas..." value="{{ $statementSearch }}">
+                            <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </form>
+                    </div>
+                </div>
+
+                @if($selectedYear)
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Foto</th>
+                                    <th>Nomor Peserta</th>
+                                    <th>NISN</th>
+                                    <th>Nama Lengkap</th>
+                                    <th>Kelas</th>
+                                    <th style="text-align: center;">Pratinjau Tanda Tangan</th>
+                                    <th>Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if($statementsList->isNotEmpty())
+                                    @php $no = ($statementsList->currentPage() - 1) * $statementsList->perPage() + 1; @endphp
+                                    @foreach($statementsList as $student)
+                                        <tr>
+                                            <td>{{ $no++ }}</td>
+                                            <td style="text-align: center;">
+                                                @if($student->foto)
+                                                     <img src="{{ (file_exists(public_path(ltrim($student->foto, '/'))) || strpos($student->foto, 'http') === 0) ? asset(ltrim($student->foto, '/')) : asset('storage/' . ltrim($student->foto, '/')) }}" alt="Foto {{ $student->nama }}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                                @else
+                                                    <span style="color: #ccc; font-size: 0.9em;">-</span>
+                                                @endif
+                                            </td>
+                                            <td><strong>{{ $student->nomor_peserta }}</strong></td>
+                                            <td>{{ $student->nisn }}</td>
+                                            <td><strong>{{ $student->nama }}</strong></td>
+                                            <td>{{ $student->kelas }}</td>
+                                            <td style="text-align: center;">
+                                                @if($student->signature)
+                                                    <img src="{{ $student->signature }}" alt="Tanda Tangan" style="max-height: 40px; border: 1px dashed #cbd5e1; padding: 2px; background: #fafafa; border-radius: 4px; object-fit: contain;">
+                                                @else
+                                                    <span style="color: var(--danger); font-size: 0.85em; font-weight: 600;">Belum Ditandatangani</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="actions-cell">
+                                                    <a href="{{ route('print.statement', ['nomor_peserta' => $student->nomor_peserta, 'nisn' => $student->nisn, 'tanggal_lahir' => \Carbon\Carbon::parse($student->tanggal_lahir)->format('Y-m-d')]) }}" target="_blank" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8em; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; box-shadow: none;">
+                                                        <i class="fa-solid fa-print"></i> Cetak Surat
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr><td colspan="8" style="text-align: center; color: #888;">Belum ada siswa yang menandatangani Surat Pernyataan pada tahun ajaran ini.</td></tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginasi Surat Pernyataan -->
+                    @if($statementsList->hasPages())
+                        <div class="card-body" style="padding: 0 24px 24px 24px;">
+                            <div class="pagination-container">
+                                <span class="pagination-info">Menampilkan data {{ $statementsList->firstItem() }} - {{ $statementsList->lastItem() }} dari total {{ $statementsList->total() }} data</span>
+                                <div class="pagination-links">
+                                    {{ $statementsList->links('pagination::bootstrap-4') }}
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @else
+                    <div class="card-body" style="text-align:center; color: #888;">
+                        <p>Silakan buat Tahun Ajaran terlebih dahulu sebelum mengelola data.</p>
+                    </div>
+                @endif
+            </div>
 
         <!-- ========================================================
              TAB 3: TESTIMONIALS (MODERASI TESTIMONI)

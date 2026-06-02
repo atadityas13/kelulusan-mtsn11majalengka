@@ -132,6 +132,28 @@ class AdminController extends Controller
             'kepala_foto'    => Setting::get('kepala_foto', 'assets/kepalamadrasah.png'),
         ];
 
+        // 8. Surat Pernyataan (tab 'statements')
+        $statementsList = collect();
+        $totalStatements = 0;
+        $statementSearch = trim($request->query('statement_search', ''));
+
+        if ($selectedYearId) {
+            $statementQuery = Student::where('academic_year_id', $selectedYearId)
+                ->whereNotNull('signature')
+                ->where('signature', '!=', '');
+            
+            if (!empty($statementSearch)) {
+                $statementQuery->where(function($q) use ($statementSearch) {
+                    $q->where('nama', 'like', "%$statementSearch%")
+                      ->orWhere('nisn', 'like', "%$statementSearch%")
+                      ->orWhere('nomor_peserta', 'like', "%$statementSearch%")
+                      ->orWhere('kelas', 'like', "%$statementSearch%");
+                });
+            }
+            $totalStatements = $statementQuery->count();
+            $statementsList = $statementQuery->orderBy('nama', 'asc')->paginate(10)->withQueryString();
+        }
+
         return view('admin.dashboard', compact(
             'activeTab',
             'statTotalStudents',
@@ -151,7 +173,10 @@ class AdminController extends Controller
             'totalHistories',
             'historySearch',
             'recentChecks',
-            'settings'
+            'settings',
+            'statementsList',
+            'totalStatements',
+            'statementSearch'
         ));
     }
 
