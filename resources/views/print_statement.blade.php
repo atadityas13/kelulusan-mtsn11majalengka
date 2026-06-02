@@ -14,16 +14,16 @@
             background-color: #f3f4f6;
             margin: 0;
             padding: 0;
-            line-height: 1.5;
-            font-size: 12pt;
+            line-height: 1.25;
+            font-size: 11pt;
         }
 
         /* Container untuk Tampilan Web */
         .page-container {
             width: 210mm;
             min-height: 297mm;
-            padding: 20mm 20mm 20mm 20mm;
-            margin: 30px auto;
+            padding: 15mm 20mm 15mm 20mm;
+            margin: 20px auto;
             background: #fff;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             box-sizing: border-box;
@@ -34,11 +34,11 @@
         /* Kop Surat atau Judul Dokumen */
         .letter-header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
 
         .letter-title {
-            font-size: 16pt;
+            font-size: 14pt;
             font-weight: bold;
             text-decoration: underline;
             margin: 0;
@@ -52,23 +52,23 @@
         }
 
         .section-intro {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         /* Tabel Detail Siswa */
         .student-details-table {
             width: 100%;
-            margin: 15px 0 25px 30px;
+            margin: 10px 0 15px 25px;
             border-collapse: collapse;
         }
 
         .student-details-table td {
-            padding: 4px 8px;
+            padding: 2px 6px;
             vertical-align: top;
         }
 
         .student-details-table td.label-col {
-            width: 220px;
+            width: 200px;
         }
 
         .student-details-table td.colon-col {
@@ -78,51 +78,51 @@
 
         /* Poin Pernyataan */
         .statement-points {
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             padding-left: 20px;
         }
 
         .statement-points li {
-            margin-bottom: 12px;
+            margin-bottom: 6px;
             text-align: justify;
             list-style-type: decimal;
             padding-left: 5px;
         }
 
         .letter-footer-text {
-            margin-bottom: 35px;
+            margin-bottom: 15px;
         }
 
         /* Blok Tanda Tangan & Tanggal */
         .signature-block {
             float: right;
-            width: 280px;
+            width: 260px;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         .signature-date {
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
 
         .signature-wrapper {
-            height: 90px;
+            height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 10px 0;
+            margin: 5px 0;
         }
 
         .signature-image {
-            max-height: 80px;
-            max-width: 220px;
+            max-height: 60px;
+            max-width: 200px;
             object-fit: contain;
         }
 
         .student-name-underline {
             font-weight: bold;
             text-decoration: underline;
-            margin-top: 5px;
+            margin-top: 2px;
         }
 
         /* Floating Navigation Bar untuk Web View */
@@ -208,7 +208,7 @@
 
             @page {
                 size: A4;
-                margin: 20mm;
+                margin: 12mm 15mm 12mm 15mm;
             }
         }
     </style>
