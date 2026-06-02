@@ -485,7 +485,7 @@
         </main>
 
         <footer class="footer">
-            <p>&copy; {{ date('Y') }} MTsN 11 Majalengka. Semua Hak Dilindungi. Developed by A.T. Aditya & Antigravity</p>
+            <p>&copy; {{ date('Y') }} MTsN 11 Majalengka. Semua Hak Dilindungi. <br>Developed by A.T. Aditya</p>
         </footer>
     </div>
 @endsection
