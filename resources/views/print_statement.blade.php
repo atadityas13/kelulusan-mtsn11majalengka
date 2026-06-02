@@ -36,7 +36,7 @@
         /* Kop Surat atau Judul Dokumen */
         .letter-header {
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 17px;
         }
 
         .letter-title {
@@ -62,6 +62,7 @@
             width: 100%;
             margin: 8px 0 10px 25px;
             border-collapse: collapse;
+            margin-bottom: 3px;
         }
 
         .student-details-table td {
@@ -252,7 +253,7 @@
 
             <table class="student-details-table">
                 <tr>
-                    <td class="label-col">Nama Lengkap Siswa</td>
+                    <td class="label-col">Nama Lengkap</td>
                     <td class="colon-col">:</td>
                     <td><strong>{{ $student->nama }}</strong></td>
                 </tr>
@@ -270,7 +271,8 @@
                     <td class="label-col">Tempat, Tanggal Lahir</td>
                     <td class="colon-col">:</td>
                     <td>{{ $student->tempat_lahir ?? '-' }},
-                        {{ $student->tanggal_lahir ? $student->tanggal_lahir->translatedFormat('d F Y') : '-' }}</td>
+                        {{ $student->tanggal_lahir ? $student->tanggal_lahir->translatedFormat('d F Y') : '-' }}
+                    </td>
                 </tr>
                 <tr>
                     <td class="label-col">Kelas</td>
@@ -282,7 +284,8 @@
             <p class="section-intro">Dengan ini menyatakan dengan sebenar-benarnya dan penuh kesadaran bahwa sehubungan
                 dengan pelaksanaan Pengumuman Kelulusan Siswa Tahun Pelajaran {{ $activeYear->year }} tanggal
                 {{ \Carbon\Carbon::parse($activeYear->target_date)->locale('id')->translatedFormat('d F Y') }}, saya
-                berkomitmen untuk:</p>
+                berkomitmen untuk:
+            </p>
 
             <ol class="statement-points">
                 <li>
