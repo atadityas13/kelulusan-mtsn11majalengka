@@ -270,7 +270,7 @@
                     <td class="label-col">Tempat, Tanggal Lahir</td>
                     <td class="colon-col">:</td>
                     <td>{{ $student->tempat_lahir ?? '-' }},
-                        {{ $student->tanggal_lahir ? $student->tanggal_lahir->translatedFormat('d F Y') : '-' }}
+                        {{ $student->tanggal_lahir ? \Carbon\Carbon::parse($student->tanggal_lahir)->locale('id')->translatedFormat('d F Y') : '-' }}
                     </td>
                 </tr>
                 <tr>
