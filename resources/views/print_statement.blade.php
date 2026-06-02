@@ -98,10 +98,11 @@
         /* Blok Tanda Tangan & Tanggal */
         .signature-block {
             float: right;
-            width: 260px;
             text-align: center;
             margin-top: 7px;
             position: relative;
+            display: inline-block;
+            min-width: 260px;
         }
 
         .signature-date {
@@ -111,13 +112,14 @@
         .signature-wrapper {
             position: absolute;
             left: 50%;
-            top: 35px;
+            top: 40px;
             transform: translateX(-50%);
             z-index: 10;
             pointer-events: none;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 100%;
         }
 
         .signature-image {
@@ -339,7 +341,7 @@
                     @endif
                 </div>
 
-                <div class="student-name-underline">{{ $student->nama }}</div>
+                <div class="student-name-underline" style="line-height: 1.2;">{{ $student->nama }}</div>
                 <div>NISN. {{ $student->nisn }}</div>
             </div>
 
